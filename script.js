@@ -84,7 +84,7 @@
     cartPanel: $('#cartPanel'), cartToggle: $('#cartToggle'), cartClose: $('#cartClose'), cartOverlayBg: $('#cartOverlayBg'), cartItems: $('#cartItems'), cartFooter: $('#cartFooter'), cartBadge: $('#cartBadge'), cartCount: $('#cartCount'), cartSubtotal: $('#cartSubtotal'), cartShipping: $('#cartShipping'), cartTax: $('#cartTax'), cartDiscount: $('#cartDiscount'), cartTotal: $('#cartTotal'), couponInput: $('#couponInput'), applyCoupon: $('#applyCoupon'), cartContinue: $('#cartContinue'),
     wishlistPanel: $('#wishlistPanel'), wishlistToggle: $('#wishlistToggle'), wishlistClose: $('#wishlistClose'), wishlistOverlayBg: $('#wishlistOverlayBg'), wishlistItems: $('#wishlistItems'), wishlistBadge: $('#wishlistBadge'), wishlistCount: $('#wishlistCount'),
     productModal: $('#productModal'), modalClose: $('#modalClose'), modalOverlay: $('#modalOverlay'), modalBody: $('#modalBody'),
-    productsGrid: $('#productsGrid'), filterBtns: $$('.filter-btn'), viewBtns: $$('.view-btn'),
+    productsGrid: $('#productsGrid'), filterBtns: $$('.filter-btn'),
     newsletterForm: $('#newsletterForm'), newsletterInput: $('#newsletterInput'), newsletterMessage: $('#newsletterMessage'), footerNewsletterForm: $('#footerNewsletterForm'),
     contactForm: $('#contactForm'),
     backToTop: $('#backToTop'), notification: $('#notification'),
@@ -96,7 +96,7 @@
     flashHours: $('#flashHours'), flashMins: $('#flashMins'), flashSecs: $('#flashSecs')
   };
 
-  const state = { cart: [], wishlist: [], compare: [], discountApplied: false };
+  const state = { cart: [], wishlist: [], compare: [], discountApplied: false, showAll: false, activeFilter: 'all' };
 
   /* ===== UTILITIES ===== */
   const fmt = n => '₹' + n.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -252,9 +252,33 @@
 
   /* ===== RENDER PRODUCTS ===== */
   function renderProducts(filter = 'all') {
-    const f = filter === 'all' ? products : products.filter(p => p.category === filter);
+    state.activeFilter = filter;
+    let f;
+    if (filter === 'all' && !state.showAll) {
+      f = products.filter(p => p.featured).slice(0, 8);
+    } else if (filter === 'all') {
+      f = products;
+    } else {
+      f = products.filter(p => p.category === filter);
+    }
     D.productsGrid.innerHTML = f.map(p => productHTML(p)).join('');
+    const viewAllBtn = document.getElementById('viewAllBtn');
+    if (viewAllBtn) {
+      if (filter === 'all') {
+        viewAllBtn.style.display = 'flex';
+        viewAllBtn.querySelector('span').textContent = state.showAll ? 'Show Less' : 'View All Products';
+        const icon = viewAllBtn.querySelector('i');
+        if (icon) icon.className = state.showAll ? 'fas fa-chevron-up' : 'fas fa-arrow-right';
+      } else {
+        viewAllBtn.style.display = 'none';
+      }
+    }
   }
+  function toggleViewAll() {
+    state.showAll = !state.showAll;
+    renderProducts(state.activeFilter);
+  }
+  window.__saToggleViewAll = toggleViewAll;
 
   /* ===== RENDER NEW ARRIVALS ===== */
   function renderNewArrivals() {
@@ -460,12 +484,7 @@
 
     /* Filter */
     D.filterBtns.forEach(btn => {
-      btn.addEventListener('click', function() { D.filterBtns.forEach(b => b.classList.remove('active')); this.classList.add('active'); renderProducts(this.dataset.filter); });
-    });
-
-    /* View Toggle */
-    D.viewBtns.forEach(btn => {
-      btn.addEventListener('click', function() { D.viewBtns.forEach(b => b.classList.remove('active')); this.classList.add('active'); D.productsGrid.classList.toggle('list-view', this.dataset.view === 'list'); });
+      btn.addEventListener('click', function() { D.filterBtns.forEach(b => b.classList.remove('active')); this.classList.add('active'); state.showAll = false; renderProducts(this.dataset.filter); });
     });
 
     /* Search Tags */

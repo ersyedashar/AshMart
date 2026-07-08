@@ -345,12 +345,11 @@
           <button class="filter-btn" data-filter="sports">Sports</button>
           <button class="filter-btn" data-filter="accessories">Accessories</button>
         </div>
-        <div class="products-view-toggle">
-          <button class="view-btn active" data-view="grid" aria-label="Grid view"><i class="fas fa-th"></i></button>
-          <button class="view-btn" data-view="list" aria-label="List view"><i class="fas fa-list"></i></button>
-        </div>
       </div>
       <div class="products-grid" id="productsGrid" data-aos="fade-up"></div>
+      <div class="products-view-all" id="viewAllBtn" onclick="window.__saToggleViewAll()">
+        <span>View All Products</span> <i class="fas fa-arrow-right"></i>
+      </div>
     </div>
   </section>
 
