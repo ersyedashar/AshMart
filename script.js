@@ -415,6 +415,15 @@
     if (typeof gsap === 'undefined') return;
   }
 
+  /* ===== UPDATE SCROLL BUTTON ===== */
+  function updateScrollBtn() {
+    const sy = window.scrollY;
+    const dh = document.documentElement.scrollHeight - window.innerHeight;
+    const nearBottom = dh - sy < 300;
+    const icon = document.getElementById('scrollIcon');
+    if (icon) icon.className = nearBottom ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+  }
+
   /* ===== EVENTS ===== */
   function initEvents() {
     /* Hamburger */
@@ -469,13 +478,6 @@
     D.contactForm && D.contactForm.addEventListener('submit', function(e) { e.preventDefault(); notif('Message sent! We\'ll get back to you soon.', 'success'); this.reset(); });
 
     /* Scroll */
-    function updateScrollBtn() {
-      const sy = window.scrollY;
-      const dh = document.documentElement.scrollHeight - window.innerHeight;
-      const nearBottom = dh - sy < 300;
-      const icon = document.getElementById('scrollIcon');
-      if (icon) icon.className = nearBottom ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
-    }
     window.addEventListener('scroll', () => {
       const sy = window.scrollY;
       D.navbar.classList.toggle('scrolled', sy > 60);
@@ -487,7 +489,7 @@
     });
 
     /* Scroll to Bottom / Top */
-    D.scrollBtn.addEventListener('click', () => {
+    D.scrollBtn && D.scrollBtn.addEventListener('click', () => {
       const dh = document.documentElement.scrollHeight - window.innerHeight;
       const nearBottom = dh - window.scrollY < 300;
       window.scrollTo({ top: nearBottom ? 0 : document.documentElement.scrollHeight, behavior: 'smooth' });
