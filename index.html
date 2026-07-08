@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AshMart - Shop Smart. Live Better. Discover premium products, exclusive collections, and a world-class shopping experience curated by SYED ASHAR.">
-  <meta name="keywords" content="AshMart, premium shopping, luxury, ecommerce, fashion, electronics, SYED ASHAR, shop smart live better">
-  <meta name="author" content="SYED ASHAR">
-  <title>AshMart - Shop Smart. Live Better.</title>
+  <meta name="description" content="AshMart - India's Premium Shopping Destination. Discover premium products, exclusive collections, COD, UPI, and fast PAN India delivery. Founded by SYED ASHAR ALI.">
+  <meta name="keywords" content="AshMart, premium shopping, India, ecommerce, fashion, electronics, SYED ASHAR ALI, COD, UPI, online shopping India">
+  <meta name="author" content="SYED ASHAR ALI">
+  <title>AshMart - India's Premium Shopping Destination</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563EB'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='16' fill='white'%3EAM%3C/text%3E%3C/svg%3E">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -102,11 +102,16 @@
       <div class="cart-footer" id="cartFooter">
         <div class="cart-coupon"><input type="text" id="couponInput" placeholder="Coupon code"><button id="applyCoupon">Apply</button></div>
         <div class="cart-summary">
-          <div class="cart-summary-row"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
-          <div class="cart-summary-row"><span>Shipping</span><span id="cartShipping">$0.00</span></div>
-          <div class="cart-summary-row"><span>Tax (8%)</span><span id="cartTax">$0.00</span></div>
-          <div class="cart-summary-row"><span>Discount</span><span id="cartDiscount">$0.00</span></div>
-          <div class="cart-summary-row cart-summary-total"><span>Total</span><span id="cartTotal">$0.00</span></div>
+          <div class="cart-summary-row"><span>Subtotal</span><span id="cartSubtotal">₹0.00</span></div>
+          <div class="cart-summary-row"><span>Shipping</span><span id="cartShipping">₹0.00</span></div>
+          <div class="cart-summary-row"><span>Tax (8%)</span><span id="cartTax">₹0.00</span></div>
+          <div class="cart-summary-row"><span>Discount</span><span id="cartDiscount">₹0.00</span></div>
+          <div class="cart-summary-row cart-summary-total"><span>Total</span><span id="cartTotal">₹0.00</span></div>
+        </div>
+        <div class="trust-badges" style="grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px">
+          <div class="trust-badge" style="padding:8px 6px"><i class="fas fa-lock" style="font-size:14px"></i><span style="font-size:9px">Secure</span></div>
+          <div class="trust-badge" style="padding:8px 6px"><i class="fas fa-truck" style="font-size:14px"></i><span style="font-size:9px">Fast</span></div>
+          <div class="trust-badge" style="padding:8px 6px"><i class="fas fa-undo" style="font-size:14px"></i><span style="font-size:9px">Returns</span></div>
         </div>
         <button class="cart-checkout">Checkout <i class="fas fa-lock"></i></button>
         <button class="cart-continue" id="cartContinue">Continue Shopping</button>
@@ -175,9 +180,9 @@
         </div>
         <div class="hero-trust">
           <div class="trust-badge"><i class="fas fa-shield-alt"></i> Secure Checkout</div>
-          <div class="trust-badge"><i class="fas fa-truck"></i> Free Shipping</div>
+          <div class="trust-badge"><i class="fas fa-truck"></i> Free Shipping ₹5,000+</div>
           <div class="trust-badge"><i class="fas fa-undo"></i> Easy Returns</div>
-          <div class="trust-badge"><i class="fas fa-gem"></i> Premium Quality</div>
+          <div class="trust-badge"><i class="fas fa-mobile-alt"></i> UPI / COD</div>
         </div>
       </div>
       <div class="hero-visual" data-aos="fade-left" data-aos-duration="1000">
@@ -209,8 +214,8 @@
         <span class="hero-stat-label">Products</span>
       </div>
       <div class="hero-stat" data-aos="fade-up" data-aos-delay="200">
-        <div class="hero-stat-number"><span data-count="120">0</span><span>+</span></div>
-        <span class="hero-stat-label">Countries</span>
+        <div class="hero-stat-number"><span data-count="500">0</span><span>+</span></div>
+        <span class="hero-stat-label">Cities in India</span>
       </div>
       <div class="hero-stat" data-aos="fade-up" data-aos-delay="300">
         <div class="hero-stat-number"><span data-count="99">0</span><span>%</span></div>
@@ -381,7 +386,7 @@
         <div class="feature-card" data-aos="fade-up" data-aos-delay="50">
           <div class="feature-icon"><i class="fas fa-truck"></i></div>
           <h3>Fast Shipping</h3>
-          <p>Free delivery on orders over $100</p>
+          <p>Free delivery on orders over ₹5,000</p>
         </div>
         <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
           <div class="feature-icon"><i class="fas fa-lock"></i></div>
@@ -410,8 +415,42 @@
         </div>
         <div class="feature-card" data-aos="fade-up" data-aos-delay="350">
           <div class="feature-icon"><i class="fas fa-globe"></i></div>
-          <h3>Worldwide Delivery</h3>
-          <p>Shipping to 120+ countries</p>
+          <h3>PAN India Delivery</h3>
+          <p>Free shipping to 500+ cities across India</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEET OUR FOUNDER -->
+  <section class="section founder-section" id="founder" aria-label="Meet Our Founder">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <span class="section-badge">Meet Our Founder</span>
+        <h2 class="section-title">The Vision Behind AshMart</h2>
+        <p class="section-desc">Discover the story of SYED ASHAR ALI — Founder & CEO</p>
+      </div>
+      <div class="founder-grid" data-aos="fade-up">
+        <div class="founder-image">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" alt="SYED ASHAR ALI - Founder & CEO" loading="lazy">
+          <div class="founder-badge"><i class="fas fa-crown"></i> Founder & CEO</div>
+        </div>
+        <div class="founder-content">
+          <h2>SYED ASHAR ALI</h2>
+          <p class="founder-title-role">Founder & Chief Executive Officer</p>
+          <p class="founder-bio">SYED ASHAR ALI is the visionary founder and CEO of AshMart, India's rising premium e-commerce destination. Hailing from Beed, Maharashtra, SYED ASHAR ALI built AshMart from the ground up with a singular mission: to deliver premium-quality products, exceptional service, and a world-class shopping experience to every corner of India. Under his leadership, AshMart has grown into a trusted brand known for quality, transparency, and customer-first values. His entrepreneurial spirit, deep understanding of Indian consumers, and commitment to excellence drive everything we do at AshMart.</p>
+          <div class="founder-stats">
+            <div class="founder-stat"><span>50K+</span><label>Happy Customers</label></div>
+            <div class="founder-stat"><span>10K+</span><label>Products</label></div>
+            <div class="founder-stat"><span>99%</span><label>Satisfaction</label></div>
+          </div>
+          <div class="founder-social">
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="mailto:ersyedashar@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+          </div>
+          <div class="founder-signature">— SYED ASHAR ALI</div>
         </div>
       </div>
     </div>
@@ -543,8 +582,8 @@
         <p class="section-desc">Everything you need to know</p>
       </div>
       <div class="faq-grid" data-aos="fade-up">
-        <div class="faq-item"><button class="faq-question" aria-expanded="false"><span>What payment methods do you accept?</span><i class="fas fa-chevron-down"></i></button><div class="faq-answer"><p>We accept Visa, Mastercard, American Express, PayPal, Apple Pay, Google Pay, and major cryptocurrencies. All transactions are encrypted and secure.</p></div></div>
-        <div class="faq-item"><button class="faq-question" aria-expanded="false"><span>How long does shipping take?</span><i class="fas fa-chevron-down"></i></button><div class="faq-answer"><p>Standard shipping: 5-7 business days. Express: 2-3 business days. International: 7-14 business days. Free shipping on orders over $100.</p></div></div>
+        <div class="faq-item"><button class="faq-question" aria-expanded="false"><span>What payment methods do you accept?</span><i class="fas fa-chevron-down"></i></button><div class="faq-answer"><p>We accept Cash on Delivery (COD), UPI, PhonePe, Google Pay, Paytm, RuPay, Visa, Mastercard, and all major Indian payment methods. All transactions are 100% secure and encrypted.</p></div></div>
+        <div class="faq-item"><button class="faq-question" aria-expanded="false"><span>How long does shipping take?</span><i class="fas fa-chevron-down"></i></button><div class="faq-answer"><p>PAN India delivery in 3-7 business days. Express shipping available in 1-2 business days. Free shipping on orders over ₹5,000.</p></div></div>
         <div class="faq-item"><button class="faq-question" aria-expanded="false"><span>What is your return policy?</span><i class="fas fa-chevron-down"></i></button><div class="faq-answer"><p>30-day hassle-free returns. Items must be unused in original packaging. Refunds processed within 5-7 business days.</p></div></div>
         <div class="faq-item"><button class="faq-question" aria-expanded="false"><span>Do you offer international shipping?</span><i class="fas fa-chevron-down"></i></button><div class="faq-answer"><p>Yes! We ship to over 120 countries worldwide. Shipping costs vary by location and are calculated at checkout.</p></div></div>
         <div class="faq-item"><button class="faq-question" aria-expanded="false"><span>How can I track my order?</span><i class="fas fa-chevron-down"></i></button><div class="faq-answer"><p>Once shipped, you'll receive a tracking number via email. Track in real-time through your account or our tracking page.</p></div></div>
@@ -559,18 +598,25 @@
       <div class="section-header" data-aos="fade-up">
         <span class="section-badge">About Us</span>
         <h2 class="section-title">Welcome to AshMart</h2>
+        <p class="section-desc">India's Premium Shopping Destination — Founded by SYED ASHAR ALI</p>
       </div>
       <div class="about-grid" data-aos="fade-up">
         <div class="about-image">
           <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80" alt="About AshMart" loading="lazy">
-          <div class="about-founded">Founded by <strong>SYED ASHAR</strong></div>
+          <div class="about-founded">Founded by <strong>SYED ASHAR ALI</strong></div>
         </div>
         <div class="about-content">
-          <p>At AshMart, we believe shopping should be simple, enjoyable, and inspiring. Our mission is to provide premium-quality products, exceptional customer service, secure shopping, and outstanding value. Every product is carefully selected to deliver quality, reliability, and satisfaction.</p>
-          <div class="about-mission">
-            <div class="about-card"><i class="fas fa-bullseye"></i><h4>Our Mission</h4><p>To make premium shopping accessible to everyone with uncompromising quality.</p></div>
-            <div class="about-card"><i class="fas fa-eye"></i><h4>Our Vision</h4><p>To be the world's most trusted and loved online shopping destination.</p></div>
-            <div class="about-card"><i class="fas fa-heart"></i><h4>Our Values</h4><p>Quality, integrity, innovation, and customer-first approach in everything we do.</p></div>
+          <p class="about-story">AshMart was founded in 2026 by <strong>SYED ASHAR ALI</strong> with a simple vision: to bring premium-quality products to every doorstep in India. From our base in <strong>Beed, Maharashtra</strong>, we've grown into a trusted online shopping destination that serves thousands of happy customers across the nation. Every product on our platform is carefully curated to ensure exceptional quality, authenticity, and value — because you deserve nothing less.</p>
+          <p class="about-story">We partner with top brands and verified sellers to offer a wide range of products — from electronics and fashion to home essentials and beauty. With COD, UPI, and all major payment options, plus fast PAN India delivery, AshMart is redefining the way India shops online.</p>
+          <div class="about-values">
+            <div class="value-card"><i class="fas fa-bullseye"></i><h4>Our Mission</h4><p>To make premium shopping accessible to every Indian with uncompromising quality and trust.</p></div>
+            <div class="value-card"><i class="fas fa-eye"></i><h4>Our Vision</h4><p>To be India's most trusted and loved online shopping destination.</p></div>
+            <div class="value-card"><i class="fas fa-heart"></i><h4>Our Values</h4><p>Quality, integrity, innovation, and customer-first approach in everything we do.</p></div>
+          </div>
+          <div class="about-timeline">
+            <div class="timeline-item"><h4>AshMart Founded</h4><span>2026</span><p>SYED ASHAR ALI launches AshMart from Beed, Maharashtra with a vision to transform Indian e-commerce.</p></div>
+            <div class="timeline-item"><h4>PAN India Launch</h4><span>2026</span><p>AshMart goes live across India with COD, UPI, and trusted delivery partners.</p></div>
+            <div class="timeline-item"><h4>Trusted by Thousands</h4><span>Today</span><p>Serving thousands of happy customers with premium products, secure payments, and exceptional service.</p></div>
           </div>
         </div>
       </div>
@@ -581,22 +627,23 @@
   <section class="section section-alt" id="contact" aria-label="Contact">
     <div class="container">
       <div class="section-header" data-aos="fade-up">
-        <span class="section-badge">Contact</span>
+        <span class="section-badge">Contact Us</span>
         <h2 class="section-title">Get in Touch</h2>
-        <p class="section-desc">We'd love to hear from you</p>
+        <p class="section-desc">We'd love to hear from you — reach out anytime</p>
       </div>
       <div class="contact-grid" data-aos="fade-up">
         <div class="contact-info">
-          <div class="contact-card"><i class="fas fa-map-marker-alt"></i><div><h4>Address</h4><p>123 Luxury Avenue, Fashion District, NY 10001</p></div></div>
-          <div class="contact-card"><i class="fas fa-phone-alt"></i><div><h4>Phone</h4><p>+1 (555) 123-4567</p></div></div>
-          <div class="contact-card"><i class="fas fa-envelope"></i><div><h4>Email</h4><p>hello@ashmart.com</p></div></div>
-          <div class="contact-card"><i class="fas fa-clock"></i><div><h4>Business Hours</h4><p>Mon-Sat: 9AM - 9PM | Sun: 10AM - 6PM</p></div></div>
+          <div class="contact-card"><i class="fas fa-map-marker-alt"></i><div><h4>Our Address</h4><p>Near Aliya Masjid, Zam Zam Colony,<br>Beed – 431122, Maharashtra, India</p></div></div>
+          <div class="contact-card"><i class="fas fa-phone-alt"></i><div><h4>Phone / WhatsApp</h4><p><a href="tel:+919404536365">+91 9404536365</a></p></div></div>
+          <div class="contact-card"><i class="fas fa-envelope"></i><div><h4>Email</h4><p><a href="mailto:ersyedashar@gmail.com">ersyedashar@gmail.com</a></p></div></div>
+          <div class="contact-card"><i class="fas fa-clock"></i><div><h4>Business Hours</h4><p>Mon–Sat: 9:00 AM – 9:00 PM | Sun: 10:00 AM – 6:00 PM</p></div></div>
+          <a href="https://wa.me/919404536365" target="_blank" rel="noopener" class="contact-whatsapp"><i class="fab fa-whatsapp"></i> Chat on WhatsApp</a>
           <div class="contact-card contact-card-social">
             <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
             <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
             <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
           </div>
         </div>
         <div class="contact-form-wrapper">
@@ -609,10 +656,50 @@
             <textarea placeholder="Your Message" rows="5" required></textarea>
             <button type="submit" class="btn btn-primary">Send Message <i class="fas fa-paper-plane"></i></button>
           </form>
-          <div class="contact-map">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d193595.1583091352!2d-74.119763973046!3d40.69766374874431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY!5e0!3m2!1sen!2sus!4v1" allowfullscreen="" loading="lazy" title="Map"></iframe>
+          <div class="contact-map-card">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3758.674501231521!2d75.727876!3d19.090567!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sBeed%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1" allowfullscreen="" loading="lazy" title="AshMart Location"></iframe>
+            <a href="https://maps.google.com/?q=Near+Aliya+Masjid+Zam+Zam+Colony+Beed+Maharashtra+431122" target="_blank" rel="noopener" class="contact-map-link"><i class="fas fa-directions"></i> Get Directions on Google Maps</a>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY SHOP ON ASHMART -->
+  <section class="section section-alt" id="trust" aria-label="Why Shop on AshMart">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <span class="section-badge">Why Shop on AshMart</span>
+        <h2 class="section-title">India's Trusted Shopping Destination</h2>
+        <p class="section-desc">We bring you the best of India — secure payments, fast delivery, and premium quality</p>
+      </div>
+      <div class="india-features" data-aos="fade-up">
+        <div class="india-feature"><i class="fas fa-rupee-sign"></i><h4>Cash on Delivery</h4><p>Pay when you receive</p></div>
+        <div class="india-feature"><i class="fas fa-mobile-alt"></i><h4>UPI / PhonePe / GPay</h4><p>Instant & secure payments</p></div>
+        <div class="india-feature"><i class="fas fa-mobile-alt"></i><h4>Paytm Wallet</h4><p>Fast checkout with Paytm</p></div>
+        <div class="india-feature"><i class="far fa-credit-card"></i><h4>RuPay Cards</h4><p>All Indian card accepted</p></div>
+        <div class="india-feature"><i class="fas fa-file-invoice"></i><h4>GST Invoice</h4><p>Tax invoice for every order</p></div>
+        <div class="india-feature"><i class="fas fa-map-marker-alt"></i><h4>PAN India Delivery</h4><p>Free shipping over ₹5,000</p></div>
+        <div class="india-feature"><i class="fas fa-shield-alt"></i><h4>100% Secure</h4><p>SSL encrypted checkout</p></div>
+        <div class="india-feature"><i class="fas fa-truck"></i><h4>Fast Delivery</h4><p>3-7 business days</p></div>
+        <div class="india-feature"><i class="fas fa-undo"></i><h4>Easy Returns</h4><p>30-day return policy</p></div>
+        <div class="india-feature"><i class="fas fa-headset"></i><h4>24/7 Support</h4><p>Call, WhatsApp, or email</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST BADGES BANNER -->
+  <section class="section" aria-label="Trust Badges">
+    <div class="container">
+      <div class="trust-badges" data-aos="fade-up" style="grid-template-columns:repeat(auto-fit, minmax(130px, 1fr))">
+        <div class="trust-badge"><i class="fas fa-lock"></i><span>Secure Payments</span><small>256-bit SSL</small></div>
+        <div class="trust-badge"><i class="fas fa-truck"></i><span>Fast Delivery</span><small>PAN India</small></div>
+        <div class="trust-badge"><i class="fas fa-undo-alt"></i><span>Easy Returns</span><small>30 days</small></div>
+        <div class="trust-badge"><i class="fas fa-gem"></i><span>Genuine Products</span><small>100% authentic</small></div>
+        <div class="trust-badge"><i class="fas fa-shield-alt"></i><span>SSL Protected</span><small>Encrypted</small></div>
+        <div class="trust-badge"><i class="fas fa-headset"></i><span>24/7 Support</span><small>Always here</small></div>
+        <div class="trust-badge"><i class="fas fa-store"></i><span>Trusted Store</span><small>Verified</small></div>
+        <div class="trust-badge"><i class="fas fa-check-circle"></i><span>Quality Assured</span><small>Premium</small></div>
       </div>
     </div>
   </section>
@@ -624,34 +711,48 @@
         <div class="footer-grid">
           <div class="footer-brand-col">
             <a href="#home" class="footer-logo"><span class="footer-logo-mark">AM</span><span>AshMart</span></a>
-            <p>Premium shopping experience for those who demand the best. Curated collections, exceptional quality, worldwide delivery. Founded by <strong>SYED ASHAR</strong>.</p>
-            <div class="footer-social">
+            <p>India's premium shopping destination. Curated collections, exceptional quality, and trust since 2026. Founded by <strong>SYED ASHAR ALI</strong> from Beed, Maharashtra.</p>
+            <div class="footer-contact-item"><i class="fas fa-map-marker-alt"></i><span>Near Aliya Masjid, Zam Zam Colony,<br>Beed – 431122, Maharashtra, India</span></div>
+            <div class="footer-contact-item"><i class="fas fa-phone-alt"></i><span><a href="tel:+919404536365">+91 9404536365</a></span></div>
+            <div class="footer-contact-item"><i class="fas fa-envelope"></i><span><a href="mailto:ersyedashar@gmail.com">ersyedashar@gmail.com</a></span></div>
+            <div class="footer-social" style="margin-top:14px">
               <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-              <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
               <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
               <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-              <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
+              <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+              <a href="https://wa.me/919404536365" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
             </div>
-            <div class="footer-payments">
-              <i class="fab fa-cc-visa" title="Visa"></i>
-              <i class="fab fa-cc-mastercard" title="Mastercard"></i>
-              <i class="fab fa-cc-amex" title="Amex"></i>
-              <i class="fab fa-cc-paypal" title="PayPal"></i>
-              <i class="fab fa-cc-apple-pay" title="Apple Pay"></i>
+            <h4 style="margin:18px 0 10px;font-size:13px">We Accept</h4>
+            <div class="footer-payment-methods">
+              <span class="footer-payment-item"><i class="fas fa-money-bill-wave"></i> COD</span>
+              <span class="footer-payment-item"><i class="fas fa-mobile-alt"></i> UPI</span>
+              <span class="footer-payment-item"><i class="fas fa-mobile-alt"></i> PhonePe</span>
+              <span class="footer-payment-item"><i class="fab fa-google-pay"></i> GPay</span>
+              <span class="footer-payment-item"><i class="fas fa-mobile-alt"></i> Paytm</span>
+              <span class="footer-payment-item"><i class="far fa-credit-card"></i> RuPay</span>
+              <span class="footer-payment-item"><i class="fab fa-cc-visa"></i> Visa</span>
+              <span class="footer-payment-item"><i class="fab fa-cc-mastercard"></i> Mastercard</span>
             </div>
           </div>
-          <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="#home">Home</a></li><li><a href="#shop">Shop</a></li><li><a href="#categories">Categories</a></li><li><a href="#new-arrivals">New Arrivals</a></li><li><a href="#best-sellers">Best Sellers</a></li><li><a href="#deals">Deals</a></li></ul></div>
-          <div class="footer-col"><h4>Customer Support</h4><ul><li><a href="#">Help Center</a></li><li><a href="#">Track Order</a></li><li><a href="#">Returns</a></li><li><a href="#">Shipping Info</a></li><li><a href="#">Contact Us</a></li><li><a href="#faq">FAQ</a></li></ul></div>
-          <div class="footer-col"><h4>Policies</h4><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Refund Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Warranty</a></li><li><a href="#">Accessibility</a></li><li><a href="#">Sitemap</a></li></ul></div>
-          <div class="footer-col footer-newsletter-col"><h4>Newsletter</h4><p>Get 10% off your first order</p><form class="footer-newsletter-form" id="footerNewsletterForm"><input type="email" placeholder="Your email" required><button type="submit" aria-label="Subscribe"><i class="fas fa-arrow-right"></i></button></form></div>
+          <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="#home">Home</a></li><li><a href="#shop">Shop</a></li><li><a href="#categories">Categories</a></li><li><a href="#new-arrivals">New Arrivals</a></li><li><a href="#best-sellers">Best Sellers</a></li><li><a href="#deals">Deals</a></li><li><a href="#about">About Us</a></li><li><a href="#contact">Contact</a></li></ul></div>
+          <div class="footer-col"><h4>Customer Support</h4><ul><li><a href="#">Help Center</a></li><li><a href="#">Track Order</a></li><li><a href="#">Returns & Exchanges</a></li><li><a href="#">Shipping Information</a></li><li><a href="#">Contact Us</a></li><li><a href="#faq">FAQ</a></li><li><a href="#">GST Invoice</a></li></ul></div>
+          <div class="footer-col"><h4>Policies</h4><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Refund Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Shipping Policy</a></li><li><a href="#">Cancellation Policy</a></li><li><a href="#">Warranty</a></li><li><a href="#">Sitemap</a></li></ul></div>
+          <div class="footer-col footer-newsletter-col"><h4>Newsletter</h4><p>Get 10% off your first order — Subscribe now</p><form class="footer-newsletter-form" id="footerNewsletterForm"><input type="email" placeholder="Your email" required><button type="submit" aria-label="Subscribe"><i class="fas fa-arrow-right"></i></button></form>
+            <div class="trust-badges" style="margin-top:16px;grid-template-columns:repeat(2,1fr)">
+              <div class="trust-badge" style="padding:10px 8px"><i class="fas fa-shield-alt" style="font-size:16px"></i><span style="font-size:10px">Secure</span></div>
+              <div class="trust-badge" style="padding:10px 8px"><i class="fas fa-truck" style="font-size:16px"></i><span style="font-size:10px">Fast</span></div>
+              <div class="trust-badge" style="padding:10px 8px"><i class="fas fa-undo" style="font-size:16px"></i><span style="font-size:10px">Returns</span></div>
+              <div class="trust-badge" style="padding:10px 8px"><i class="fas fa-gem" style="font-size:16px"></i><span style="font-size:10px">Quality</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
       <div class="container">
-        <p>&copy; 2026 AshMart. All Rights Reserved.</p>
-        <p>Founded by <strong>SYED ASHAR</strong> with <i class="fas fa-heart"></i></p>
+        <p>&copy; 2026 AshMart. All Rights Reserved. | Made with <i class="fas fa-heart"></i> in India</p>
+        <p>Founded by <strong>SYED ASHAR ALI</strong> — Beed, Maharashtra</p>
       </div>
     </div>
   </footer>
