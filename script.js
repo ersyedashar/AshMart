@@ -282,13 +282,13 @@
 
   /* ===== RENDER NEW ARRIVALS ===== */
   function renderNewArrivals() {
-    const na = products.filter(p => p.badge === 'new' || p.badge === 'trending').slice(0, 6);
+    const na = products.filter(p => p.badge === 'new' || p.badge === 'trending').slice(0, 4);
     D.newArrivalsGrid.innerHTML = na.map(p => productHTML(p)).join('');
   }
 
   /* ===== RENDER BEST SELLERS ===== */
   function renderBestSellers() {
-    const bs = products.filter(p => p.badge === 'best-seller' || p.badge === 'popular').slice(0, 6);
+    const bs = products.filter(p => p.badge === 'best-seller' || p.badge === 'popular').slice(0, 4);
     D.bestSellersGrid.innerHTML = bs.map(p => productHTML(p)).join('');
   }
 
