@@ -1,4 +1,4 @@
-/* ===== SYED ASHAR - Premium E-Commerce ===== */
+/* ===== AshMart - Premium E-Commerce ===== */
 
 (function () {
   'use strict';
@@ -71,7 +71,7 @@
     { name:'David Kim', avatar:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80', rating:5, text:"My go-to store for premium products. Consistent quality, fair prices, flawless user experience." },
     { name:'Olivia Thompson', avatar:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80', rating:5, text:"Received so many compliments! Outstanding craftsmanship. You can really feel the quality. Highly recommend!" },
     { name:'James Wilson', avatar:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80', rating:4, text:"Fast delivery, exactly as described. Accurate size guide and easy return policy gives peace of mind." },
-    { name:'Sophia Lee', avatar:'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&q=80', rating:5, text:"SYED ASHAR is my new favorite store! Everything is curated beautifully and the quality is unmatched." },
+    { name:'Sophia Lee', avatar:'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&q=80', rating:5, text:"AshMart is my new favorite store! Everything is curated beautifully and the quality is unmatched." },
     { name:'Daniel Brown', avatar:'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80', rating:5, text:"Premium products, premium service. The 24/7 support team went above and beyond to help me." }
   ];
 
@@ -102,7 +102,7 @@
   const fmt = n => '$' + n.toFixed(2);
   const stars = r => '<i class="fas fa-star"></i>'.repeat(Math.floor(r)) + (r%1>=.5?'<i class="fas fa-star-half-alt"></i>':'') + '<i class="far fa-star"></i>'.repeat(5-Math.ceil(r));
   const disc = (o,c) => Math.round((o-c)/o*100);
-  const ls = { get(k,d){try{return JSON.parse(localStorage.getItem('sa_'+k))||d}catch{return d}}, set(k,v){try{localStorage.setItem('sa_'+k,JSON.stringify(v))}catch{}} };
+  const ls = { get(k,d){try{return JSON.parse(localStorage.getItem('am_'+k))||d}catch{return d}}, set(k,v){try{localStorage.setItem('am_'+k,JSON.stringify(v))}catch{}} };
 
   /* ===== LOADER ===== */
   function hideLoader() { D.loader && D.loader.classList.add('hidden'); }
@@ -344,8 +344,8 @@
   /* ===== COUPON ===== */
   function applyCoupon() {
     const code = D.couponInput.value.trim().toUpperCase();
-    if (code === 'SA20') { state.discountApplied = true; D.applyCoupon.textContent = '✓ Applied'; D.applyCoupon.style.background = '#059669'; cartRender(); notif('Coupon applied! 20% OFF', 'success'); }
-    else { state.discountApplied = false; D.applyCoupon.textContent = 'Apply'; D.applyCoupon.style.background = ''; notif('Invalid code. Try "SA20"', 'error'); }
+    if (code === 'ASHMART20') { state.discountApplied = true; D.applyCoupon.textContent = '✓ Applied'; D.applyCoupon.style.background = '#059669'; cartRender(); notif('Coupon applied! 20% OFF', 'success'); }
+    else { state.discountApplied = false; D.applyCoupon.textContent = 'Apply'; D.applyCoupon.style.background = ''; notif('Invalid code. Try "ASHMART20"', 'error'); }
   }
 
   /* ===== FAQ ===== */
