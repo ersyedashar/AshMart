@@ -87,7 +87,7 @@
     productsGrid: $('#productsGrid'), filterBtns: $$('.filter-btn'),
     newsletterForm: $('#newsletterForm'), newsletterInput: $('#newsletterInput'), newsletterMessage: $('#newsletterMessage'), footerNewsletterForm: $('#footerNewsletterForm'),
     contactForm: $('#contactForm'),
-    backToTop: $('#backToTop'), notification: $('#notification'),
+    scrollBtn: $('#scrollBtn'), notification: $('#notification'),
     compareBar: $('#compareBar'), compareCount: $('#compareCount'), compareThumbs: $('#compareThumbs'), compareBtn: $('#compareBtn'), compareClose: $('#compareClose'),
     trendingSwiper: $('#trendingSwiper'), trendingWrapper: $('#trendingWrapper'),
     testimonialWrapper: $('#testimonialWrapper'),
@@ -469,18 +469,29 @@
     D.contactForm && D.contactForm.addEventListener('submit', function(e) { e.preventDefault(); notif('Message sent! We\'ll get back to you soon.', 'success'); this.reset(); });
 
     /* Scroll */
+    function updateScrollBtn() {
+      const sy = window.scrollY;
+      const dh = document.documentElement.scrollHeight - window.innerHeight;
+      const nearBottom = dh - sy < 300;
+      const icon = document.getElementById('scrollIcon');
+      if (icon) icon.className = nearBottom ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+    }
     window.addEventListener('scroll', () => {
       const sy = window.scrollY;
       D.navbar.classList.toggle('scrolled', sy > 60);
-      D.backToTop.classList.toggle('visible', sy > 400);
+      updateScrollBtn();
       $$('.nav-link').forEach(link => {
         const t = link.getAttribute('href');
         if (t && t.startsWith('#')) { const s = document.querySelector(t); if (s) { const r = s.getBoundingClientRect(); link.classList.toggle('active', r.top <= 120 && r.bottom >= 120); } }
       });
     });
 
-    /* Back to Top */
-    D.backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    /* Scroll to Bottom / Top */
+    D.scrollBtn.addEventListener('click', () => {
+      const dh = document.documentElement.scrollHeight - window.innerHeight;
+      const nearBottom = dh - window.scrollY < 300;
+      window.scrollTo({ top: nearBottom ? 0 : document.documentElement.scrollHeight, behavior: 'smooth' });
+    });
 
     /* Filter */
     D.filterBtns.forEach(btn => {
@@ -525,6 +536,7 @@
     initEvents();
     heroParticles();
     animateCounters();
+    updateScrollBtn();
     setTimeout(initGsap, 150);
     setTimeout(initAos, 250);
   }
