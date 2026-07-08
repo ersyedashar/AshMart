@@ -389,14 +389,6 @@
   /* ===== GSAP ===== */
   function initGsap() {
     if (typeof gsap === 'undefined') return;
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    tl.from('.hero-badge', { y: 30, opacity: 0, duration: .5 })
-      .from('.hero-title', { y: 40, opacity: 0, duration: .7 }, '-=.3')
-      .from('.hero-subtitle', { y: 30, opacity: 0, duration: .5 }, '-=.4')
-      .from('.hero-buttons .btn', { y: 20, opacity: 0, duration: .4, stagger: .12 }, '-=.3')
-      .from('.hero-trust', { y: 20, opacity: 0, duration: .4 }, '-=.2')
-      .from('.hero-visual', { x: 40, opacity: 0, duration: .7 }, '-=.5')
-      .from('.hero-floating-badge', { scale: 0, opacity: 0, duration: .3, stagger: .1 }, '-=.3');
   }
 
   /* ===== EVENTS ===== */
