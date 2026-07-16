@@ -119,6 +119,142 @@
     </div>
   </div>
 
+  <!-- CHECKOUT PANEL -->
+  <div class="checkout-panel" id="checkoutPanel" role="dialog" aria-modal="true" aria-label="Checkout">
+    <div class="checkout-overlay-bg" id="checkoutOverlayBg"></div>
+    <div class="checkout-content">
+      <div class="checkout-header">
+        <button class="checkout-back" id="checkoutBack" aria-label="Go back"><i class="fas fa-arrow-left"></i></button>
+        <div class="checkout-header-title"><i class="fas fa-lock"></i> Secure Checkout</div>
+        <button class="checkout-close" id="checkoutClose" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="checkout-steps" id="checkoutSteps">
+        <div class="checkout-step active" data-step="1"><div class="checkout-step-num">1</div><span>Summary</span></div>
+        <div class="checkout-step-line"></div>
+        <div class="checkout-step" data-step="2"><div class="checkout-step-num">2</div><span>Shipping</span></div>
+        <div class="checkout-step-line"></div>
+        <div class="checkout-step" data-step="3"><div class="checkout-step-num">3</div><span>Payment</span></div>
+      </div>
+
+      <!-- STEP 1: ORDER SUMMARY -->
+      <div class="checkout-step-content active" id="checkoutStep1">
+        <div class="checkout-items" id="checkoutItems"></div>
+        <div class="checkout-coupon-row">
+          <input type="text" id="checkoutCouponInput" placeholder="Coupon code" class="checkout-coupon-input">
+          <button class="checkout-coupon-btn" id="checkoutApplyCoupon">Apply</button>
+        </div>
+        <div class="checkout-summary">
+          <div class="checkout-summary-row"><span>Subtotal</span><span id="ckSubtotal">₹0.00</span></div>
+          <div class="checkout-summary-row"><span>Shipping</span><span id="ckShipping">₹0.00</span></div>
+          <div class="checkout-summary-row"><span>Tax (8%)</span><span id="ckTax">₹0.00</span></div>
+          <div class="checkout-summary-row checkout-disc-row" id="ckDiscRow" style="display:none"><span>Discount</span><span id="ckDiscount">-₹0.00</span></div>
+          <div class="checkout-summary-row checkout-total-row"><span>Total</span><span id="ckTotal">₹0.00</span></div>
+        </div>
+        <div class="checkout-secure-bar">
+          <i class="fas fa-shield-alt"></i>
+          <span>256-bit SSL encrypted · 100% secure</span>
+        </div>
+        <button class="btn btn-primary checkout-next-btn" id="toStep2">Continue to Shipping <i class="fas fa-arrow-right"></i></button>
+      </div>
+
+      <!-- STEP 2: SHIPPING DETAILS -->
+      <div class="checkout-step-content" id="checkoutStep2">
+        <form class="checkout-form" id="shippingForm" novalidate>
+          <div class="checkout-form-section-title"><i class="fas fa-user"></i> Contact Information</div>
+          <div class="checkout-form-row">
+            <div class="checkout-field"><label>Full Name *</label><input type="text" name="fullName" id="ckName" placeholder="e.g. Syed Ashar Ali" required autocomplete="name"></div>
+            <div class="checkout-field"><label>Phone Number *</label><input type="tel" name="phone" id="ckPhone" placeholder="e.g. 9404536365" required pattern="[6-9]\d{9}" maxlength="10" autocomplete="tel"></div>
+          </div>
+          <div class="checkout-field"><label>Email Address *</label><input type="email" name="email" id="ckEmail" placeholder="e.g. ersyedashar@gmail.com" required autocomplete="email"></div>
+
+          <div class="checkout-form-section-title" style="margin-top:18px"><i class="fas fa-map-marker-alt"></i> Delivery Address</div>
+          <div class="checkout-field"><label>Flat / House No. / Building *</label><input type="text" name="address" id="ckAddress" placeholder="e.g. 123, Zam Zam Colony" required autocomplete="street-address"></div>
+          <div class="checkout-field"><label>Landmark (Optional)</label><input type="text" name="landmark" id="ckLandmark" placeholder="e.g. Near Aliya Masjid"></div>
+          <div class="checkout-form-row">
+            <div class="checkout-field"><label>City / District *</label><input type="text" name="city" id="ckCity" placeholder="e.g. Beed" required autocomplete="address-level2"></div>
+            <div class="checkout-field"><label>Pincode *</label><input type="text" name="pincode" id="ckPincode" placeholder="e.g. 431122" required pattern="\d{6}" maxlength="6" inputmode="numeric" autocomplete="postal-code"></div>
+          </div>
+          <div class="checkout-field">
+            <label>State *</label>
+            <select name="state" id="ckState" required autocomplete="address-level1">
+              <option value="">Select State</option>
+              <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+              <option>Andaman and Nicobar Islands</option><option>Chandigarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Jammu and Kashmir</option><option>Ladakh</option><option>Lakshadweep</option><option>Puducherry</option>
+            </select>
+          </div>
+          <div class="checkout-field checkout-field-full">
+            <label>Order Note (Optional)</label>
+            <textarea name="note" id="ckNote" placeholder="Any special delivery instructions?" rows="2"></textarea>
+          </div>
+        </form>
+        <div class="checkout-nav">
+          <button class="btn btn-outline checkout-nav-back" id="backToStep1"><i class="fas fa-arrow-left"></i> Back</button>
+          <button class="btn btn-primary" id="toStep3">Continue to Payment <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 3: PAYMENT -->
+      <div class="checkout-step-content" id="checkoutStep3">
+        <div class="checkout-payment-review">
+          <div class="checkout-review-block">
+            <div class="checkout-review-header"><i class="fas fa-truck"></i> Shipping To<button class="checkout-review-edit" id="editShipping">Edit</button></div>
+            <div class="checkout-review-body" id="ckShippingReview"></div>
+          </div>
+          <div class="checkout-review-block">
+            <div class="checkout-review-header"><i class="fas fa-shopping-bag"></i> Order Summary<button class="checkout-review-edit" id="editSummary">Edit</button></div>
+            <div class="checkout-review-body" id="ckOrderReview"></div>
+          </div>
+        </div>
+        <div class="checkout-payment-methods">
+          <div class="checkout-payment-title"><i class="fas fa-credit-card"></i> Payment Method</div>
+          <div class="checkout-payment-option active">
+            <div class="checkout-payment-radio"></div>
+            <div class="checkout-payment-info">
+              <strong>Pay Online</strong>
+              <span>UPI · Cards · Netbanking · Wallets</span>
+            </div>
+            <div class="checkout-payment-logos">
+              <span>UPI</span><span>Visa</span><span>MC</span><span>RuPay</span>
+            </div>
+          </div>
+        </div>
+        <div class="checkout-summary checkout-summary-mini">
+          <div class="checkout-summary-row checkout-total-row"><span>Total payable</span><span id="ckPayTotal">₹0.00</span></div>
+        </div>
+        <button class="checkout-pay-btn" id="payNowBtn">
+          <i class="fas fa-lock"></i> Pay Securely with Razorpay
+        </button>
+        <div class="checkout-secure-bar">
+          <i class="fas fa-shield-alt"></i>
+          <span>Payments powered by Razorpay · PCI-DSS compliant</span>
+        </div>
+        <div class="checkout-nav">
+          <button class="btn btn-outline checkout-nav-back" id="backToStep2"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+      </div>
+
+      <!-- ORDER CONFIRMATION -->
+      <div class="checkout-step-content checkout-confirm" id="checkoutConfirm" style="display:none">
+        <div class="checkout-success-anim">
+          <div class="checkout-success-circle">
+            <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="25" fill="none" stroke="#10B981" stroke-width="2" class="checkout-success-circle-svg"/><path fill="none" stroke="#10B981" stroke-width="3" d="M14.1 27.2l7.1 7.2 16.7-16.8" class="checkout-success-check"/></svg>
+          </div>
+        </div>
+        <h2 class="checkout-success-title">Order Placed Successfully!</h2>
+        <p class="checkout-success-sub">Thank you for shopping with AshMart</p>
+        <div class="checkout-success-details">
+          <div class="checkout-success-row"><span>Order ID</span><strong id="ckOrderId"></strong></div>
+          <div class="checkout-success-row"><span>Payment</span><strong id="ckPaymentId">—</strong></div>
+          <div class="checkout-success-row"><span>Amount</span><strong id="ckPayAmount">₹0.00</strong></div>
+          <div class="checkout-success-row"><span>Delivery</span><strong>3–7 business days</strong></div>
+        </div>
+        <p class="checkout-success-note">A confirmation has been sent to your email.</p>
+        <button class="btn btn-primary checkout-success-btn" id="ckContinueBtn">Continue Shopping <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+
   <!-- WISHLIST PANEL -->
   <div class="wishlist-panel" id="wishlistPanel" role="dialog" aria-modal="true" aria-label="Wishlist">
     <div class="wishlist-overlay-bg" id="wishlistOverlayBg"></div>
@@ -778,6 +914,7 @@
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

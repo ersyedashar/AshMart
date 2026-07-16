@@ -88,6 +88,7 @@
     newsletterForm: $('#newsletterForm'), newsletterInput: $('#newsletterInput'), newsletterMessage: $('#newsletterMessage'), footerNewsletterForm: $('#footerNewsletterForm'),
     contactForm: $('#contactForm'),
     scrollBtn: $('#scrollBtn'), notification: $('#notification'),
+    checkoutPanel: $('#checkoutPanel'), checkoutClose: $('#checkoutClose'), checkoutBack: $('#checkoutBack'), checkoutOverlayBg: $('#checkoutOverlayBg'),
     compareBar: $('#compareBar'), compareCount: $('#compareCount'), compareThumbs: $('#compareThumbs'), compareBtn: $('#compareBtn'), compareClose: $('#compareClose'),
     trendingSwiper: $('#trendingSwiper'), trendingWrapper: $('#trendingWrapper'),
     testimonialWrapper: $('#testimonialWrapper'),
@@ -424,6 +425,202 @@
     if (icon) icon.className = nearBottom ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
   }
 
+  /* ===== CHECKOUT ===== */
+  let ckCurrentStep = 1;
+  let ckShippingData = {};
+
+  function openCheckout() {
+    if (!state.cart.length) { notif('Your cart is empty', 'error'); return; }
+    D.cartPanel.classList.remove('active');
+    ckCurrentStep = 1;
+    ckShippingData = {};
+    updateCkSteps();
+    renderCheckoutSummary();
+    D.checkoutPanel.classList.add('active');
+    D.body.style.overflow = 'hidden';
+  }
+  function closeCheckout() {
+    D.checkoutPanel.classList.remove('active');
+    D.body.style.overflow = '';
+  }
+
+  function goToStep(n) {
+    if (n === 2 && !validateShipping()) return;
+    ckCurrentStep = n;
+    updateCkSteps();
+    if (n === 3) renderPaymentReview();
+  }
+
+  function updateCkSteps() {
+    $$('.checkout-step').forEach(el => {
+      const s = parseInt(el.dataset.step);
+      el.classList.remove('active', 'completed');
+      if (s === ckCurrentStep) el.classList.add('active');
+      else if (s < ckCurrentStep) el.classList.add('completed');
+    });
+    $$('.checkout-step-line').forEach((line, i) => {
+      line.classList.toggle('filled', i < ckCurrentStep - 1);
+    });
+    $$('.checkout-step-content').forEach(c => c.classList.remove('active'));
+    if (ckCurrentStep <= 3) {
+      const stepEl = document.getElementById('checkoutStep' + ckCurrentStep);
+      if (stepEl) stepEl.classList.add('active');
+    }
+  }
+
+  function renderCheckoutSummary() {
+    const items = state.cart.map(i => {
+      const p = products.find(x => x.id === i.id); if (!p) return '';
+      return `<div class="checkout-item"><img src="${p.image}" alt="${p.title}" loading="lazy"><div class="checkout-item-info"><h4>${p.title}</h4><div class="checkout-item-meta">${p.category}</div><div class="checkout-item-price">${fmt(p.price)} <span class="checkout-item-qty">× ${i.qty}</span></div></div></div>`;
+    }).join('');
+    document.getElementById('checkoutItems').innerHTML = items;
+    updateCkTotals();
+    document.getElementById('checkoutCouponInput').value = '';
+    const couponBtn = document.getElementById('checkoutApplyCoupon');
+    if (state.discountApplied) { couponBtn.textContent = '✓ Applied'; couponBtn.classList.add('applied'); }
+    else { couponBtn.textContent = 'Apply'; couponBtn.classList.remove('applied'); }
+  }
+
+  function updateCkTotals() {
+    const t = cartTotals();
+    document.getElementById('ckSubtotal').textContent = fmt(t.sub);
+    document.getElementById('ckShipping').textContent = t.ship === 0 ? 'Free' : fmt(t.ship);
+    document.getElementById('ckTax').textContent = fmt(t.tax);
+    const discRow = document.getElementById('ckDiscRow');
+    if (t.disc > 0) { discRow.style.display = 'flex'; document.getElementById('ckDiscount').textContent = '-' + fmt(t.disc); }
+    else { discRow.style.display = 'none'; }
+    document.getElementById('ckTotal').textContent = fmt(t.total);
+    document.getElementById('ckPayTotal').textContent = fmt(t.total);
+  }
+
+  function validateShipping() {
+    let valid = true;
+    const fields = [
+      { id: 'ckName', test: v => v.trim().length >= 2, msg: 'Enter your full name' },
+      { id: 'ckPhone', test: v => /^[6-9]\d{9}$/.test(v.trim()), msg: 'Enter valid 10-digit phone' },
+      { id: 'ckEmail', test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), msg: 'Enter valid email address' },
+      { id: 'ckAddress', test: v => v.trim().length >= 5, msg: 'Enter complete address' },
+      { id: 'ckCity', test: v => v.trim().length >= 2, msg: 'Enter city name' },
+      { id: 'ckPincode', test: v => /^\d{6}$/.test(v.trim()), msg: 'Enter valid 6-digit pincode' },
+      { id: 'ckState', test: v => v.trim().length > 0, msg: 'Select your state' }
+    ];
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      const val = el.value;
+      if (!f.test(val)) {
+        el.classList.add('error');
+        let errEl = el.parentElement.querySelector('.field-error');
+        if (!errEl) { errEl = document.createElement('div'); errEl.className = 'field-error'; el.parentElement.appendChild(errEl); }
+        errEl.textContent = f.msg;
+        errEl.style.display = 'block';
+        valid = false;
+      } else {
+        el.classList.remove('error');
+        const errEl = el.parentElement.querySelector('.field-error');
+        if (errEl) errEl.style.display = 'none';
+      }
+    });
+    if (!valid) notif('Please fill all required fields correctly', 'error');
+    else {
+      ckShippingData = {
+        name: document.getElementById('ckName').value.trim(),
+        phone: document.getElementById('ckPhone').value.trim(),
+        email: document.getElementById('ckEmail').value.trim(),
+        address: document.getElementById('ckAddress').value.trim(),
+        landmark: document.getElementById('ckLandmark').value.trim(),
+        city: document.getElementById('ckCity').value.trim(),
+        pincode: document.getElementById('ckPincode').value.trim(),
+        state: document.getElementById('ckState').value,
+        note: document.getElementById('ckNote').value.trim()
+      };
+    }
+    return valid;
+  }
+
+  function renderPaymentReview() {
+    const s = ckShippingData;
+    const addr = `${s.name}<br>${s.address}${s.landmark ? ', ' + s.landmark : ''}<br>${s.city}, ${s.state} - ${s.pincode}<br>Phone: ${s.phone}<br>Email: ${s.email}`;
+    document.getElementById('ckShippingReview').innerHTML = addr;
+    const t = cartTotals();
+    let itemsHtml = state.cart.map(i => {
+      const p = products.find(x => x.id === i.id); if (!p) return '';
+      return `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;"><span>${p.title} × ${i.qty}</span><strong>${fmt(p.price * i.qty)}</strong></div>`;
+    }).join('');
+    itemsHtml += `<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;font-size:12px;">`;
+    itemsHtml += `<div style="display:flex;justify-content:space-between;"><span>Shipping</span><span>${t.ship === 0 ? 'Free' : fmt(t.ship)}</span></div>`;
+    itemsHtml += `<div style="display:flex;justify-content:space-between;"><span>Tax</span><span>${fmt(t.tax)}</span></div>`;
+    if (t.disc > 0) itemsHtml += `<div style="display:flex;justify-content:space-between;color:var(--secondary);"><span>Discount</span><span>-${fmt(t.disc)}</span></div>`;
+    itemsHtml += `</div>`;
+    document.getElementById('ckOrderReview').innerHTML = itemsHtml;
+  }
+
+  function initRazorpay() {
+    const t = cartTotals();
+    if (t.total <= 0) { notif('Invalid order total', 'error'); return; }
+    const payBtn = document.getElementById('payNowBtn');
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+    const options = {
+      key: 'rzp_test_TEEyk8qRTMqPmr',
+      amount: Math.round(t.total * 100),
+      currency: 'INR',
+      name: 'AshMart',
+      description: 'Order Payment',
+      image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\'%3E%3Crect width=\'32\' height=\'32\' rx=\'8\' fill=\'%232563EB\'/%3E%3Ctext x=\'16\' y=\'22\' text-anchor=\'middle\' font-family=\'Arial\' font-weight=\'bold\' font-size=\'16\' fill=\'white\'%3EAM%3C/text%3E%3C/svg%3E',
+      prefill: { name: ckShippingData.name, email: ckShippingData.email, contact: ckShippingData.phone },
+      notes: { address: ckShippingData.address + ', ' + ckShippingData.city + ', ' + ckShippingData.state + ' - ' + ckShippingData.pincode, landmark: ckShippingData.landmark, order_note: ckShippingData.note },
+      theme: { color: '#2563EB' },
+      handler: function(response) {
+        showOrderConfirm(response.razorpay_payment_id, t.total);
+      },
+      modal: {
+        ondismiss: function() {
+          payBtn.disabled = false;
+          payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay Securely with Razorpay';
+        }
+      }
+    };
+
+    try {
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function(response) {
+        notif('Payment failed. Please try again.', 'error');
+        payBtn.disabled = false;
+        payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay Securely with Razorpay';
+      });
+      rzp.open();
+    } catch(e) {
+      notif('Razorpay not loaded. Please check your connection.', 'error');
+      payBtn.disabled = false;
+      payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay Securely with Razorpay';
+    }
+  }
+
+  function showOrderConfirm(paymentId, amount) {
+    const orderId = 'AM' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+    document.getElementById('ckOrderId').textContent = orderId;
+    document.getElementById('ckPaymentId').textContent = paymentId || 'COD';
+    document.getElementById('ckPayAmount').textContent = fmt(amount);
+    $$('.checkout-step-content').forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
+    const confirmEl = document.getElementById('checkoutConfirm');
+    confirmEl.style.display = 'flex';
+    confirmEl.classList.add('active');
+    $$('.checkout-step').forEach(el => el.classList.add('completed'));
+    $$('.checkout-step-line').forEach(l => l.classList.add('filled'));
+    state.cart = [];
+    ls.set('cart', state.cart);
+    cartRender();
+    notif('Order placed successfully!', 'success');
+    if (typeof confetti !== 'undefined') confetti({ particleCount: 200, spread: 100, origin: { y: .6 } });
+  }
+
+  function resetCheckout() {
+    $$('.checkout-step-content').forEach(c => { c.style.display = ''; c.classList.remove('active'); });
+    document.getElementById('checkoutConfirm').style.display = 'none';
+    closeCheckout();
+  }
+
   /* ===== EVENTS ===== */
   function initEvents() {
     /* Hamburger */
@@ -444,6 +641,35 @@
     D.cartOverlayBg.addEventListener('click', () => D.cartPanel.classList.remove('active'));
     D.cartContinue.addEventListener('click', () => D.cartPanel.classList.remove('active'));
 
+    /* Checkout */
+    const cartCheckoutBtn = document.querySelector('.cart-checkout');
+    if (cartCheckoutBtn) cartCheckoutBtn.addEventListener('click', openCheckout);
+    D.checkoutClose.addEventListener('click', closeCheckout);
+    D.checkoutOverlayBg.addEventListener('click', closeCheckout);
+    D.checkoutBack.addEventListener('click', () => { if (ckCurrentStep > 1) goToStep(ckCurrentStep - 1); else closeCheckout(); });
+    document.getElementById('toStep2').addEventListener('click', () => goToStep(2));
+    document.getElementById('toStep3').addEventListener('click', () => goToStep(3));
+    document.getElementById('backToStep1').addEventListener('click', () => goToStep(1));
+    document.getElementById('backToStep2').addEventListener('click', () => goToStep(2));
+    document.getElementById('payNowBtn').addEventListener('click', initRazorpay);
+    document.getElementById('ckContinueBtn').addEventListener('click', resetCheckout);
+    document.getElementById('checkoutApplyCoupon').addEventListener('click', () => {
+      const code = document.getElementById('checkoutCouponInput').value.trim().toUpperCase();
+      const btn = document.getElementById('checkoutApplyCoupon');
+      if (code === 'ASHMART20') { state.discountApplied = true; btn.textContent = '✓ Applied'; btn.classList.add('applied'); updateCkTotals(); notif('Coupon applied! 20% OFF', 'success'); }
+      else { state.discountApplied = false; btn.textContent = 'Apply'; btn.classList.remove('applied'); notif('Invalid code. Try "ASHMART20"', 'error'); }
+    });
+    document.getElementById('editShipping').addEventListener('click', () => goToStep(2));
+    document.getElementById('editSummary').addEventListener('click', () => goToStep(1));
+
+    /* Live field validation */
+    $$('.checkout-field input, .checkout-field select').forEach(el => {
+      el.addEventListener('input', () => { el.classList.remove('error'); const err = el.parentElement.querySelector('.field-error'); if (err) err.style.display = 'none'; });
+      el.addEventListener('blur', () => {
+        if (el.hasAttribute('required') && !el.value.trim()) { el.classList.add('error'); }
+      });
+    });
+
     /* Wishlist */
     D.wishlistToggle.addEventListener('click', () => D.wishlistPanel.classList.add('active'));
     D.wishlistClose.addEventListener('click', () => D.wishlistPanel.classList.remove('active'));
@@ -452,7 +678,7 @@
     /* Modal */
     D.modalClose.addEventListener('click', closeModal);
     D.modalOverlay.addEventListener('click', closeModal);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeSearch(); D.cartPanel.classList.remove('active'); D.wishlistPanel.classList.remove('active'); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeSearch(); closeCheckout(); D.cartPanel.classList.remove('active'); D.wishlistPanel.classList.remove('active'); } });
 
     /* Compare */
     D.compareClose.addEventListener('click', () => { state.compare = []; compareRender(); });
