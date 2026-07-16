@@ -596,7 +596,7 @@
     if (savedOrder) {
       try {
         const rpRes = await API.createRazorpayOrder(Math.round(t.total * 100), savedOrder._id);
-        razorpayOrderId = rpRes.order.id;
+        razorpayOrderId = rpRes.razorpayOrder.id;
       } catch (e) {
         console.log('Server Razorpay order skipped:', e.message);
       }
