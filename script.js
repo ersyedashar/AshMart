@@ -89,6 +89,10 @@
     contactForm: $('#contactForm'),
     scrollBtn: $('#scrollBtn'), notification: $('#notification'),
     checkoutPanel: $('#checkoutPanel'), checkoutClose: $('#checkoutClose'), checkoutBack: $('#checkoutBack'), checkoutOverlayBg: $('#checkoutOverlayBg'),
+    authModal: $('#authModal'), authOverlay: $('#authOverlay'), authClose: $('#authClose'), loginBtn: $('#loginBtn'),
+    authLoginWrap: $('#authLoginWrap'), authRegisterWrap: $('#authRegisterWrap'), authProfileWrap: $('#authProfileWrap'),
+    authLoginForm: $('#authLoginForm'), authRegisterForm: $('#authRegisterForm'),
+    profileName: $('#profileName'), profileEmail: $('#profileEmail'),
     compareBar: $('#compareBar'), compareCount: $('#compareCount'), compareThumbs: $('#compareThumbs'), compareBtn: $('#compareBtn'), compareClose: $('#compareClose'),
     trendingSwiper: $('#trendingSwiper'), trendingWrapper: $('#trendingWrapper'),
     testimonialWrapper: $('#testimonialWrapper'),
@@ -554,25 +558,78 @@
     document.getElementById('ckOrderReview').innerHTML = itemsHtml;
   }
 
-  function initRazorpay() {
+  async function initRazorpay() {
     const t = cartTotals();
     if (t.total <= 0) { notif('Invalid order total', 'error'); return; }
     const payBtn = document.getElementById('payNowBtn');
     payBtn.disabled = true;
-    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating order...';
 
+    /* --- Build order items --- */
+    const items = state.cart.map(ci => {
+      const p = products.find(x => x.id === ci.id);
+      return { product: p ? (p._id || String(p.id)) : String(ci.id), title: ci.title, image: ci.image, price: ci.price, quantity: ci.qty, size: ci.size, color: ci.color };
+    });
+    const shippingAddress = {
+      fullName: ckShippingData.name, email: ckShippingData.email, phone: ckShippingData.phone,
+      street: ckShippingData.address, landmark: ckShippingData.landmark, city: ckShippingData.city,
+      state: ckShippingData.state, pincode: ckShippingData.pincode
+    };
+    const orderPayload = {
+      items, shippingAddress, paymentMethod: 'razorpay',
+      subtotal: t.subtotal, shipping: t.shipping, tax: t.tax, discount: t.discount, total: t.total,
+      note: ckShippingData.note || ''
+    };
+
+    /* --- Save order to backend --- */
+    let savedOrder = null;
+    try {
+      const orderRes = await API.createOrder(orderPayload);
+      savedOrder = orderRes.order;
+    } catch (e) {
+      /* Backend may be unreachable — proceed with client-side Razorpay only */
+      console.log('Backend order save skipped:', e.message);
+    }
+
+    /* --- Create Razorpay order on server if possible --- */
+    let razorpayOrderId = undefined;
+    if (savedOrder) {
+      try {
+        const rpRes = await API.createRazorpayOrder(Math.round(t.total * 100), savedOrder._id);
+        razorpayOrderId = rpRes.order.id;
+      } catch (e) {
+        console.log('Server Razorpay order skipped:', e.message);
+      }
+    }
+
+    /* --- Launch Razorpay --- */
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening payment...';
     const options = {
       key: 'rzp_test_TEEyk8qRTMqPmr',
       amount: Math.round(t.total * 100),
       currency: 'INR',
       name: 'AshMart',
-      description: 'Order Payment',
+      description: savedOrder ? 'Order #' + savedOrder.orderNumber : 'Order Payment',
       image: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\'%3E%3Crect width=\'32\' height=\'32\' rx=\'8\' fill=\'%232563EB\'/%3E%3Ctext x=\'16\' y=\'22\' text-anchor=\'middle\' font-family=\'Arial\' font-weight=\'bold\' font-size=\'16\' fill=\'white\'%3EAM%3C/text%3E%3C/svg%3E',
       prefill: { name: ckShippingData.name, email: ckShippingData.email, contact: ckShippingData.phone },
       notes: { address: ckShippingData.address + ', ' + ckShippingData.city + ', ' + ckShippingData.state + ' - ' + ckShippingData.pincode, landmark: ckShippingData.landmark, order_note: ckShippingData.note },
       theme: { color: '#2563EB' },
-      handler: function(response) {
-        showOrderConfirm(response.razorpay_payment_id, t.total);
+      ...(razorpayOrderId ? { order_id: razorpayOrderId } : {}),
+      handler: async function(response) {
+        /* --- Verify payment on backend --- */
+        if (savedOrder) {
+          try {
+            await API.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: savedOrder._id
+            });
+          } catch (e) {
+            console.log('Payment verification skipped:', e.message);
+          }
+        }
+        showOrderConfirm(response.razorpay_payment_id, t.total, savedOrder);
       },
       modal: {
         ondismiss: function() {
@@ -597,8 +654,8 @@
     }
   }
 
-  function showOrderConfirm(paymentId, amount) {
-    const orderId = 'AM' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+  function showOrderConfirm(paymentId, amount, savedOrder) {
+    const orderId = savedOrder ? savedOrder.orderNumber : 'AM' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
     document.getElementById('ckOrderId').textContent = orderId;
     document.getElementById('ckPaymentId').textContent = paymentId || 'COD';
     document.getElementById('ckPayAmount').textContent = fmt(amount);
@@ -619,6 +676,62 @@
     $$('.checkout-step-content').forEach(c => { c.style.display = ''; c.classList.remove('active'); });
     document.getElementById('checkoutConfirm').style.display = 'none';
     closeCheckout();
+  }
+
+  /* ===== AUTH ===== */
+  function openAuth() {
+    D.authModal.classList.add('active');
+    D.body.style.overflow = 'hidden';
+    updateAuthView();
+  }
+  function closeAuth() {
+    D.authModal.classList.remove('active');
+    D.body.style.overflow = '';
+  }
+  function updateAuthView() {
+    const loggedIn = API.isLoggedIn();
+    D.authLoginWrap.classList.remove('active');
+    D.authRegisterWrap.classList.remove('active');
+    D.authProfileWrap.classList.remove('active');
+    const iconEl = D.loginBtn.querySelector('i');
+    const spanEl = D.loginBtn.querySelector('span');
+    if (loggedIn) {
+      D.authProfileWrap.classList.add('active');
+      const u = API.getUser();
+      if (u) { D.profileName.textContent = u.name; D.profileEmail.textContent = u.email; }
+      spanEl.textContent = u ? u.name.split(' ')[0] : 'Account';
+      iconEl.className = 'fas fa-user-check';
+      D.loginBtn.classList.add('logged-in');
+    } else {
+      D.authLoginWrap.classList.add('active');
+      spanEl.textContent = 'Login';
+      iconEl.className = 'fas fa-user';
+      D.loginBtn.classList.remove('logged-in');
+    }
+  }
+  function showAuthError(id, msg) { const el = document.getElementById(id); if (el) el.textContent = msg; }
+  function clearAuthErrors() { $$('.auth-error').forEach(e => e.textContent = ''); $$('.auth-field input').forEach(i => i.classList.remove('error')); }
+
+  /* ===== API PRODUCTS (fallback to local) ===== */
+  let apiProductsLoaded = false;
+  async function loadProductsFromAPI() {
+    try {
+      const data = await API.getProducts({ limit: 100 });
+      if (data.products && data.products.length) {
+        products.length = 0;
+        data.products.forEach(p => products.push({
+          id: parseInt(p._id.replace(/[^0-9]/g, '').substring(0, 8)) || products.length + 1,
+          _id: p._id, title: p.title, category: p.category, price: p.price,
+          originalPrice: p.originalPrice, rating: p.rating, reviews: p.reviews,
+          badge: p.badge, badgeText: p.badgeText, image: p.image, images: p.images,
+          description: p.description, colors: p.colors, sizes: p.sizes, featured: p.featured
+        }));
+        apiProductsLoaded = true;
+        console.log('Loaded ' + products.length + ' products from API');
+      }
+    } catch (e) {
+      console.log('API not available, using local products');
+    }
   }
 
   /* ===== EVENTS ===== */
@@ -661,6 +774,47 @@
     });
     document.getElementById('editShipping').addEventListener('click', () => goToStep(2));
     document.getElementById('editSummary').addEventListener('click', () => goToStep(1));
+
+    /* Auth Modal */
+    D.loginBtn.addEventListener('click', openAuth);
+    D.authClose.addEventListener('click', closeAuth);
+    D.authOverlay.addEventListener('click', closeAuth);
+    document.getElementById('showRegister').addEventListener('click', () => { clearAuthErrors(); D.authLoginWrap.classList.remove('active'); D.authRegisterWrap.classList.add('active'); });
+    document.getElementById('showLogin').addEventListener('click', () => { clearAuthErrors(); D.authRegisterWrap.classList.remove('active'); D.authLoginWrap.classList.add('active'); });
+    D.authLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); clearAuthErrors();
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      if (!email || !pass) { showAuthError('loginError', 'Fill all fields'); return; }
+      try {
+        await API.login(email, pass);
+        closeAuth(); updateAuthView(); notif('Signed in!', 'success');
+      } catch (err) { showAuthError('loginError', err.message); }
+    });
+    D.authRegisterForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); clearAuthErrors();
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const pass = document.getElementById('regPass').value;
+      if (!name || !email || !phone || !pass) { showAuthError('registerError', 'Fill all fields'); return; }
+      if (!/^[6-9]\d{9}$/.test(phone)) { showAuthError('registerError', 'Enter valid 10-digit phone'); return; }
+      if (pass.length < 6) { showAuthError('registerError', 'Password min 6 characters'); return; }
+      try {
+        await API.register(name, email, phone, pass);
+        closeAuth(); updateAuthView(); notif('Account created!', 'success');
+      } catch (err) { showAuthError('registerError', err.message); }
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => { API.logout(); updateAuthView(); closeAuth(); notif('Signed out', 'success'); });
+    document.getElementById('viewOrdersBtn').addEventListener('click', async () => {
+      closeAuth();
+      try {
+        const res = await API.getMyOrders();
+        if (res.orders && res.orders.length) {
+          notif('You have ' + res.orders.length + ' order(s). Full order history coming soon!', 'success');
+        } else { notif('No orders yet. Start shopping!', 'info'); }
+      } catch (e) { notif('Please sign in to view orders.', 'error'); }
+    });
 
     /* Live field validation */
     $$('.checkout-field input, .checkout-field select').forEach(el => {
@@ -749,9 +903,12 @@
   }
 
   /* ===== INIT ===== */
-  function init() {
+  async function init() {
     cartInit();
     wishlistInit();
+    API.loadFromStorage();
+    updateAuthView();
+    await loadProductsFromAPI();
     renderProducts();
     renderNewArrivals();
     renderBestSellers();

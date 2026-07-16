@@ -119,6 +119,53 @@
     </div>
   </div>
 
+  <!-- AUTH MODAL -->
+  <div class="auth-modal" id="authModal" role="dialog" aria-modal="true" aria-label="Account">
+    <div class="auth-overlay" id="authOverlay"></div>
+    <div class="auth-box">
+      <button class="auth-close" id="authClose" aria-label="Close">&times;</button>
+      <div class="auth-logo"><span class="auth-logo-mark">AM</span></div>
+
+      <!-- Login Form -->
+      <div class="auth-form-wrap active" id="authLoginWrap">
+        <h2>Welcome Back</h2>
+        <p class="auth-sub">Sign in to your AshMart account</p>
+        <form class="auth-form" id="authLoginForm" novalidate>
+          <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com" required autocomplete="email"></div>
+          <div class="auth-field"><label>Password</label><input type="password" id="loginPass" placeholder="Enter password" required minlength="6" autocomplete="current-password"></div>
+          <div class="auth-error" id="loginError"></div>
+          <button type="submit" class="btn btn-primary auth-submit">Sign In <i class="fas fa-arrow-right"></i></button>
+        </form>
+        <p class="auth-switch">Don't have an account? <button id="showRegister">Create one</button></p>
+      </div>
+
+      <!-- Register Form -->
+      <div class="auth-form-wrap" id="authRegisterWrap">
+        <h2>Create Account</h2>
+        <p class="auth-sub">Join AshMart for exclusive deals</p>
+        <form class="auth-form" id="authRegisterForm" novalidate>
+          <div class="auth-field"><label>Full Name</label><input type="text" id="regName" placeholder="Syed Ashar Ali" required minlength="2" autocomplete="name"></div>
+          <div class="auth-field"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com" required autocomplete="email"></div>
+          <div class="auth-field"><label>Phone</label><input type="tel" id="regPhone" placeholder="9404536365" required pattern="[6-9]\d{9}" maxlength="10" autocomplete="tel"></div>
+          <div class="auth-field"><label>Password</label><input type="password" id="regPass" placeholder="Min 6 characters" required minlength="6" autocomplete="new-password"></div>
+          <div class="auth-error" id="registerError"></div>
+          <button type="submit" class="btn btn-primary auth-submit">Create Account <i class="fas fa-arrow-right"></i></button>
+        </form>
+        <p class="auth-switch">Already have an account? <button id="showLogin">Sign in</button></p>
+      </div>
+
+      <!-- Logged In State -->
+      <div class="auth-form-wrap" id="authProfileWrap">
+        <h2 id="profileName">My Account</h2>
+        <p class="auth-sub" id="profileEmail">user@email.com</p>
+        <div class="auth-profile-actions">
+          <button class="auth-profile-btn" id="viewOrdersBtn"><i class="fas fa-box"></i> My Orders</button>
+          <button class="auth-profile-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- CHECKOUT PANEL -->
   <div class="checkout-panel" id="checkoutPanel" role="dialog" aria-modal="true" aria-label="Checkout">
     <div class="checkout-overlay-bg" id="checkoutOverlayBg"></div>
@@ -915,6 +962,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="api.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
