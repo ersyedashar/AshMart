@@ -445,7 +445,7 @@
   }
 
   function goToStep(n) {
-    if (n === 2 && !validateShipping()) return;
+    if (n === 3 && !validateShipping()) return;
     ckCurrentStep = n;
     updateCkSteps();
     if (n === 3) renderPaymentReview();
