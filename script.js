@@ -75,6 +75,34 @@
     { name:'Daniel Brown', avatar:'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80', rating:5, text:"Premium products, premium service. The 24/7 support team went above and beyond to help me." }
   ];
 
+  const sampleReviews = [
+    { name:'Priya Sharma', avatar:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80', rating:5, text:'Amazing quality! Exceeded my expectations. Fast delivery and great packaging.', date:'2 days ago', verified:true },
+    { name:'Rahul Patel', avatar:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80', rating:5, text:'Best purchase I have made this year. The product is exactly as described. Highly recommend!', date:'5 days ago', verified:true },
+    { name:'Ananya Singh', avatar:'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80', rating:4, text:'Very good product. Shipping was fast. Would buy again from AshMart.', date:'1 week ago', verified:true },
+    { name:'Vikram Reddy', avatar:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80', rating:5, text:'Premium quality and great value for money. The packaging was also excellent.', date:'1 week ago', verified:false },
+    { name:'Meera Joshi', avatar:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80', rating:4, text:'Love this product! Works perfectly. Customer support was also very helpful.', date:'2 weeks ago', verified:true },
+    { name:'Arjun Nair', avatar:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80', rating:5, text:'Exceeded expectations! Great build quality and the price is unbeatable.', date:'2 weeks ago', verified:true },
+    { name:'Sneha Gupta', avatar:'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&q=80', rating:5, text:'Absolutely worth every penny. Fastest delivery I have ever experienced.', date:'3 weeks ago', verified:false },
+    { name:'Karthik Menon', avatar:'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80', rating:4, text:'Good product overall. A bit expensive but the quality justifies the price.', date:'3 weeks ago', verified:true }
+  ];
+  function getReviewsForProduct(pid) {
+    const seed = pid * 7;
+    const count = 3 + (seed % 3);
+    const shuffled = [...sampleReviews].sort(() => (seed * 0.1) - 0.5);
+    return shuffled.slice(0, count);
+  }
+  function renderStarDistribution(rating) {
+    const dist = [0, 0, 0, 0, 0];
+    const total = 50;
+    dist[4] = Math.round(total * (rating / 5) * 0.7);
+    dist[3] = Math.round(total * 0.2);
+    dist[2] = Math.round(total * 0.07);
+    dist[1] = Math.round(total * 0.02);
+    dist[0] = total - dist[1] - dist[2] - dist[3] - dist[4];
+    return dist;
+  }
+  const indianCities = ['Mumbai','Delhi','Bangalore','Hyderabad','Chennai','Kolkata','Pune','Ahmedabad','Jaipur','Lucknow','Surat','Kochi','Indore','Bhopal','Nagpur'];
+
   /* ===== DOM REFS ===== */
   const D = {
     body: document.body, html: document.documentElement,
@@ -101,13 +129,14 @@
     flashHours: $('#flashHours'), flashMins: $('#flashMins'), flashSecs: $('#flashSecs')
   };
 
-  const state = { cart: [], wishlist: [], compare: [], discountApplied: false, showAll: false, activeFilter: 'all', selectedPayment: 'online' };
+  const state = { cart: [], wishlist: [], compare: [], discountApplied: false, showAll: false, activeFilter: 'all', selectedPayment: 'online', recentlyViewed: [], giftWrap: false };
 
   /* ===== UTILITIES ===== */
   const fmt = n => '₹' + n.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   const stars = r => '<i class="fas fa-star"></i>'.repeat(Math.floor(r)) + (r%1>=.5?'<i class="fas fa-star-half-alt"></i>':'') + '<i class="far fa-star"></i>'.repeat(5-Math.ceil(r));
   const disc = (o,c) => Math.round((o-c)/o*100);
   const ls = { get(k,d){try{return JSON.parse(localStorage.getItem('am_'+k))||d}catch{return d}}, set(k,v){try{localStorage.setItem('am_'+k,JSON.stringify(v))}catch{}} };
+  state.recentlyViewed = ls.get('recentlyViewed', []);
 
   /* ===== LOADER ===== */
   function hideLoader() { D.loader && D.loader.classList.add('hidden'); }
@@ -145,7 +174,8 @@
     const taxable = sub - disc;
     let ship = 0; if (state.cart.length && sub < 2000) ship = 199; else if (state.cart.length && sub < 5000) ship = 99;
     const tax = taxable * 0.08;
-    return { sub, disc, ship, tax, total: taxable + tax + ship, count: state.cart.reduce((s,i)=>s+i.qty,0) };
+    const gw = state.giftWrap ? 49 : 0;
+    return { sub, disc, ship, tax, total: taxable + tax + ship + gw, gw, count: state.cart.reduce((s,i)=>s+i.qty,0) };
   }
   function cartRender() {
     const t = cartTotals();
@@ -164,6 +194,7 @@
     D.cartShipping.textContent = t.ship === 0 ? 'Free' : fmt(t.ship);
     D.cartTax.textContent = fmt(t.tax);
     D.cartDiscount.textContent = t.disc > 0 ? '- ' + fmt(t.disc) : fmt(0);
+    document.getElementById('cartGiftWrap').textContent = t.gw > 0 ? fmt(t.gw) : fmt(0);
     D.cartTotal.textContent = fmt(t.total);
   }
   window.__saCartQty = cartQty; window.__saCartRemove = cartRemove;
@@ -219,6 +250,35 @@
     n.appendChild(i); n.appendChild(document.createTextNode(' ' + msg));
     n.classList.add(type, 'show');
     clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('show'), 3000);
+  }
+
+  /* ===== SOCIAL PROOF ===== */
+  function startSocialProof() {
+    const names = ['Priya from Mumbai','Rahul from Delhi','Ananya from Bangalore','Vikram from Hyderabad','Meera from Chennai','Arjun from Kolkata','Sneha from Pune','Karthik from Ahmedabad','Deepa from Jaipur','Amit from Lucknow','Neha from Kochi','Rohan from Indore','Pooja from Nagpur','Sanjay from Bhopal','Kavya from Surat'];
+    function showSocialProof() {
+      const product = products[Math.floor(Math.random() * products.length)];
+      const city = names[Math.floor(Math.random() * names.length)];
+      const toast = document.createElement('div');
+      toast.className = 'social-proof-toast';
+      toast.innerHTML = `<img src="${product.image}" alt="" class="social-proof-img"><div class="social-proof-text"><strong>${city}</strong> just purchased <span>${product.title.length > 30 ? product.title.substring(0, 30) + '...' : product.title}</span></div>`;
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('show'));
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
+    }
+    setTimeout(() => { showSocialProof(); setInterval(showSocialProof, 15000 + Math.random() * 10000); }, 8000);
+  }
+
+  /* ===== RECENTLY VIEWED ===== */
+  function renderRecentlyViewed() {
+    const grid = document.getElementById('recentlyViewedGrid');
+    const section = document.getElementById('recentlyViewedSection');
+    if (!grid || !section) return;
+    if (state.recentlyViewed.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    grid.innerHTML = state.recentlyViewed.slice(0, 6).map(id => {
+      const p = products.find(x => x.id === id);
+      return p ? productHTML(p) : '';
+    }).join('');
   }
 
   /* ===== PRODUCT CARD HTML ===== */
@@ -317,10 +377,17 @@
     const p = products.find(x => x.id === id); if (!p) return;
     currentGalleryIndex = 0;
     currentModalProductId = id;
+    state.recentlyViewed = state.recentlyViewed.filter(x => x !== id);
+    state.recentlyViewed.unshift(id);
+    if (state.recentlyViewed.length > 10) state.recentlyViewed = state.recentlyViewed.slice(0, 10);
+    ls.set('recentlyViewed', state.recentlyViewed);
+    renderRecentlyViewed();
     const d = p.originalPrice ? disc(p.originalPrice, p.price) : 0;
     const inW = state.wishlist.includes(p.id);
     const stock = p.reviews > 3000 ? 'in-stock' : p.reviews > 1000 ? 'in-stock' : 'low-stock';
     const stockLabel = p.reviews > 3000 ? 'In Stock — Ready to ship' : p.reviews > 1000 ? 'In Stock' : 'Low Stock — Order soon';
+    const stockCount = p.reviews > 3000 ? Math.floor(Math.random() * 40) + 20 : Math.floor(Math.random() * 8) + 2;
+    const viewerCount = Math.floor(Math.random() * 35) + 5;
     const specs = [
       { label: 'Brand', value: 'AshMart Verified' },
       { label: 'Category', value: p.category.charAt(0).toUpperCase() + p.category.slice(1) },
@@ -332,6 +399,39 @@
     const specsHtml = specs.map(s => `<div class="modal-spec-item"><span class="spec-label">${s.label}</span><span class="spec-value">${s.value}</span></div>`).join('');
     const deliveryDate = new Date(); deliveryDate.setDate(deliveryDate.getDate() + Math.floor(Math.random() * 4) + 3);
     const deliveryStr = deliveryDate.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+    const reviews = getReviewsForProduct(p.id);
+    const dist = renderStarDistribution(p.rating);
+    const maxDist = Math.max(...dist);
+    const reviewsHtml = reviews.map(r => `
+      <div class="review-card">
+        <div class="review-header">
+          <img src="${r.avatar}" alt="${r.name}" class="review-avatar">
+          <div class="review-meta">
+            <div class="review-name">${r.name} ${r.verified ? '<span class="review-verified"><i class="fas fa-check-circle"></i> Verified</span>' : ''}</div>
+            <div class="review-stars">${stars(r.rating)}</div>
+          </div>
+          <span class="review-date">${r.date}</span>
+        </div>
+        <p class="review-text">${r.text}</p>
+      </div>
+    `).join('');
+    const distHtml = dist.reverse().map((count, i) => {
+      const starsNum = 5 - i;
+      const pct = maxDist > 0 ? (count / maxDist) * 100 : 0;
+      return `<div class="rating-dist-row"><span class="rating-dist-label">${starsNum} <i class="fas fa-star"></i></span><div class="rating-dist-bar"><div class="rating-dist-fill" style="width:${pct}%"></div></div><span class="rating-dist-count">${count}</span></div>`;
+    }).join('');
+    const related = products.filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
+    const relatedHtml = related.map(r => `
+      <div class="related-card" onclick="window.__saQuickView(${r.id})">
+        <img src="${r.image}" alt="${r.title}" loading="lazy">
+        <div class="related-info">
+          <h4>${r.title.length > 28 ? r.title.substring(0, 28) + '...' : r.title}</h4>
+          <span class="related-price">${fmt(r.price)}</span>
+        </div>
+      </div>
+    `).join('');
+    const shareUrl = encodeURIComponent(window.location.href);
+    const shareText = encodeURIComponent('Check out this ' + p.title + ' on AshMart!');
     D.modalBody.innerHTML = `
       <div class="modal-gallery">
         <div class="modal-gallery-main">
@@ -353,6 +453,7 @@
           ${d > 0 ? `<span class="modal-discount">-${d}% OFF</span>` : ''}
         </div>
         <div class="modal-stock ${stock}"><i class="fas fa-circle"></i> ${stockLabel}</div>
+        <div class="modal-urgency"><span class="modal-urgency-views"><i class="fas fa-eye"></i> ${viewerCount} people viewing this right now</span><span class="modal-urgency-stock"><i class="fas fa-fire"></i> Only ${stockCount} left in stock</span></div>
         <p class="modal-description">${p.description}</p>
         <div class="modal-estimated-delivery">
           <i class="fas fa-truck-fast"></i>
@@ -374,6 +475,22 @@
           <button class="btn btn-primary" onclick="window.__saCartAdd(${p.id});window.__saCloseModal()"><i class="fas fa-shopping-bag"></i> Add to Cart</button>
           <button class="modal-wishlist-btn ${inW?'active':''}" onclick="window.__saWishlistToggle(${p.id});window.__saQuickView(${p.id})" title="Wishlist"><i class="${inW?'fas':'far'} fa-heart"></i></button>
         </div>
+        <div class="modal-share"><h4>Share this product</h4><div class="share-buttons">
+          <a href="https://api.whatsapp.com/send?text=${shareText}%20${shareUrl}" target="_blank" class="share-btn share-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          <a href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank" class="share-btn share-twitter"><i class="fab fa-twitter"></i> Twitter</a>
+          <button class="share-btn share-copy" onclick="navigator.clipboard.writeText(window.location.href);this.innerHTML='<i class=\\'fas fa-check\\'></i> Copied!';setTimeout(()=>this.innerHTML='<i class=\\'fas fa-link\\'></i> Copy Link',2000)"><i class="fas fa-link"></i> Copy Link</button>
+        </div></div>
+        <div class="modal-reviews-section">
+          <div class="modal-reviews-header">
+            <h4>Customer Reviews</h4>
+            <div class="modal-reviews-summary">
+              <div class="reviews-big-rating"><span>${p.rating}</span><div class="reviews-big-stars">${stars(p.rating)}</div><span class="reviews-total">${p.reviews.toLocaleString()} reviews</span></div>
+              <div class="reviews-dist">${distHtml}</div>
+            </div>
+          </div>
+          <div class="reviews-list">${reviewsHtml}</div>
+        </div>
+        ${related.length > 0 ? `<div class="modal-related"><h4>You may also like</h4><div class="related-grid">${relatedHtml}</div></div>` : ''}
       </div>`;
     D.productModal.classList.add('active');
     D.body.style.overflow = 'hidden';
@@ -568,6 +685,8 @@
     const discRow = document.getElementById('ckDiscRow');
     if (t.disc > 0) { discRow.style.display = 'flex'; document.getElementById('ckDiscount').textContent = '-' + fmt(t.disc); }
     else { discRow.style.display = 'none'; }
+    const gwRow = document.getElementById('ckGiftWrapRow');
+    if (gwRow) { gwRow.style.display = t.gw > 0 ? 'flex' : 'none'; document.getElementById('ckGiftWrap').textContent = fmt(t.gw); }
     document.getElementById('ckTotal').textContent = fmt(t.total);
     document.getElementById('ckPayTotal').textContent = fmt(t.total);
   }
@@ -891,6 +1010,9 @@
     D.cartOverlayBg.addEventListener('click', () => D.cartPanel.classList.remove('active'));
     D.cartContinue.addEventListener('click', () => D.cartPanel.classList.remove('active'));
 
+    const gwCheckbox = document.getElementById('giftWrapCheck');
+    if (gwCheckbox) gwCheckbox.addEventListener('change', function() { state.giftWrap = this.checked; cartRender(); updateCkTotals(); });
+
     /* Checkout */
     const cartCheckoutBtn = document.querySelector('.cart-checkout');
     if (cartCheckoutBtn) cartCheckoutBtn.addEventListener('click', openCheckout);
@@ -1089,6 +1211,8 @@
     heroParticles();
     animateCounters();
     updateScrollBtn();
+    renderRecentlyViewed();
+    startSocialProof();
     setTimeout(initGsap, 150);
     setTimeout(initAos, 250);
   }

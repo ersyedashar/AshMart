@@ -104,6 +104,11 @@
       </div>
       <div class="cart-footer" id="cartFooter">
         <div class="cart-coupon"><input type="text" id="couponInput" placeholder="Coupon code"><button id="applyCoupon">Apply</button></div>
+        <div class="gift-wrap-row" id="giftWrapRow">
+          <input type="checkbox" id="giftWrapCheck">
+          <div class="gift-wrap-label"><strong>Add Gift Wrapping</strong><span>Premium eco-friendly gift wrap + personal message card</span></div>
+          <span class="gift-wrap-price">₹49</span>
+        </div>
         <div class="cart-summary">
           <div class="cart-summary-row"><span>Subtotal</span><span id="cartSubtotal">₹0.00</span></div>
           <div class="cart-summary-row"><span>Shipping</span><span id="cartShipping">₹0.00</span></div>
@@ -199,6 +204,7 @@
           <div class="checkout-summary-row"><span>Shipping</span><span id="ckShipping">₹0.00</span></div>
           <div class="checkout-summary-row"><span>Tax (8%)</span><span id="ckTax">₹0.00</span></div>
           <div class="checkout-summary-row checkout-disc-row" id="ckDiscRow" style="display:none"><span>Discount</span><span id="ckDiscount">-₹0.00</span></div>
+          <div class="checkout-summary-row" id="ckGiftWrapRow" style="display:none"><span>Gift Wrap</span><span id="ckGiftWrap">₹0.00</span></div>
           <div class="checkout-summary-row checkout-total-row"><span>Total</span><span id="ckTotal">₹0.00</span></div>
         </div>
         <div class="checkout-secure-bar">
@@ -684,6 +690,18 @@
           <div class="swiper-button-prev"></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- RECENTLY VIEWED -->
+  <section class="section recently-viewed-section" id="recentlyViewedSection" aria-label="Recently Viewed" style="display:none">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <span class="section-badge">Continue Browsing</span>
+        <h2 class="section-title">Recently Viewed</h2>
+        <p class="section-desc">Products you recently looked at</p>
+      </div>
+      <div class="recently-viewed-grid" id="recentlyViewedGrid" data-aos="fade-up"></div>
     </div>
   </section>
 
