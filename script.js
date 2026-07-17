@@ -101,7 +101,7 @@
     flashHours: $('#flashHours'), flashMins: $('#flashMins'), flashSecs: $('#flashSecs')
   };
 
-  const state = { cart: [], wishlist: [], compare: [], discountApplied: false, showAll: false, activeFilter: 'all' };
+  const state = { cart: [], wishlist: [], compare: [], discountApplied: false, showAll: false, activeFilter: 'all', selectedPayment: 'online' };
 
   /* ===== UTILITIES ===== */
   const fmt = n => '₹' + n.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -319,6 +319,19 @@
     currentModalProductId = id;
     const d = p.originalPrice ? disc(p.originalPrice, p.price) : 0;
     const inW = state.wishlist.includes(p.id);
+    const stock = p.reviews > 3000 ? 'in-stock' : p.reviews > 1000 ? 'in-stock' : 'low-stock';
+    const stockLabel = p.reviews > 3000 ? 'In Stock — Ready to ship' : p.reviews > 1000 ? 'In Stock' : 'Low Stock — Order soon';
+    const specs = [
+      { label: 'Brand', value: 'AshMart Verified' },
+      { label: 'Category', value: p.category.charAt(0).toUpperCase() + p.category.slice(1) },
+      { label: 'Rating', value: p.rating + ' / 5' },
+      { label: 'Reviews', value: p.reviews.toLocaleString() },
+      { label: 'Warranty', value: p.category === 'electronics' ? '1 Year' : '30 Days' },
+      { label: 'Returns', value: '7-Day Easy Returns' },
+    ];
+    const specsHtml = specs.map(s => `<div class="modal-spec-item"><span class="spec-label">${s.label}</span><span class="spec-value">${s.value}</span></div>`).join('');
+    const deliveryDate = new Date(); deliveryDate.setDate(deliveryDate.getDate() + Math.floor(Math.random() * 4) + 3);
+    const deliveryStr = deliveryDate.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
     D.modalBody.innerHTML = `
       <div class="modal-gallery">
         <div class="modal-gallery-main">
@@ -337,14 +350,23 @@
         <div class="modal-price-row">
           <div class="modal-price">${fmt(p.price)}</div>
           ${p.originalPrice ? `<span class="modal-original-price">${fmt(p.originalPrice)}</span>` : ''}
-          ${d > 0 ? `<span class="modal-discount">-${d}%</span>` : ''}
+          ${d > 0 ? `<span class="modal-discount">-${d}% OFF</span>` : ''}
         </div>
+        <div class="modal-stock ${stock}"><i class="fas fa-circle"></i> ${stockLabel}</div>
         <p class="modal-description">${p.description}</p>
-        <div class="modal-delivery-info">
-          <div class="modal-delivery-row"><i class="fas fa-truck"></i><span>Free delivery on orders above ₹5,000</span></div>
-          <div class="modal-delivery-row"><i class="fas fa-undo"></i><span>7-day easy returns</span></div>
-          <div class="modal-delivery-row"><i class="fas fa-shield-alt"></i><span>Genuine product guarantee</span></div>
+        <div class="modal-estimated-delivery">
+          <i class="fas fa-truck-fast"></i>
+          <div class="modal-estimated-delivery-text">
+            <strong>Delivery by ${deliveryStr}</strong>
+            <span>Free delivery on orders above ₹5,000 · Express available</span>
+          </div>
         </div>
+        <div class="modal-trust-row">
+          <div class="modal-trust-item"><i class="fas fa-shield-alt"></i> Genuine Product</div>
+          <div class="modal-trust-item"><i class="fas fa-undo"></i> 7-Day Returns</div>
+          <div class="modal-trust-item"><i class="fas fa-lock"></i> Secure Checkout</div>
+        </div>
+        <div class="modal-specs"><h4>Product Details</h4><div class="modal-specs-grid">${specsHtml}</div></div>
         <div class="modal-colors"><h4>Colors</h4><div class="color-options">${p.colors.map((c,i) => `<button class="color-btn ${i===0?'active':''}" style="background:${c}" onclick="document.querySelectorAll('#modalBody .color-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')"></button>`).join('')}</div></div>
         <div class="modal-sizes"><h4>Size</h4><div class="size-options">${p.sizes.map((s,i) => `<button class="size-btn ${i===0?'active':''}" onclick="document.querySelectorAll('#modalBody .size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">${s}</button>`).join('')}</div></div>
         <div class="modal-quantity"><h4>Qty:</h4><button onclick="const e=this.nextElementSibling;let v=parseInt(e.textContent);if(v>1){v--;e.textContent=v}">−</button><span id="modalQty">1</span><button onclick="const e=this.previousElementSibling;let v=parseInt(e.textContent);v++;e.textContent=v">+</button></div>
@@ -611,6 +633,44 @@
     document.getElementById('ckOrderReview').innerHTML = itemsHtml;
   }
 
+  async function initCOD() {
+    const t = cartTotals();
+    if (t.total <= 0) { notif('Invalid order total', 'error'); return; }
+    if (t.total > 25000) { notif('COD is available for orders up to ₹25,000', 'error'); return; }
+    const payBtn = document.getElementById('payNowBtn');
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Placing your order...';
+
+    const items = state.cart.map(ci => {
+      const p = products.find(x => x.id === ci.id);
+      return { product: p ? (p._id || String(p.id)) : String(ci.id), title: ci.title, image: ci.image, price: ci.price, quantity: ci.qty, size: ci.size, color: ci.color };
+    });
+    const shippingAddress = {
+      fullName: ckShippingData.name, email: ckShippingData.email, phone: ckShippingData.phone,
+      street: ckShippingData.address, landmark: ckShippingData.landmark, city: ckShippingData.city,
+      state: ckShippingData.state, pincode: ckShippingData.pincode
+    };
+    const orderPayload = {
+      items, shippingAddress, paymentMethod: 'cod',
+      subtotal: t.sub, shipping: t.ship, tax: t.tax, discount: t.disc, total: t.total,
+      note: ckShippingData.note || ''
+    };
+
+    let savedOrder = null;
+    try {
+      const orderRes = await API.createOrder(orderPayload);
+      savedOrder = orderRes.order;
+    } catch (e) {
+      console.log('Backend order save skipped:', e.message);
+    }
+
+    setTimeout(() => {
+      showOrderConfirm('COD — Pay on delivery', t.total, savedOrder);
+      payBtn.disabled = false;
+      payBtn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order with COD';
+    }, 1200);
+  }
+
   async function initRazorpay() {
     const t = cartTotals();
     if (t.total <= 0) { notif('Invalid order total', 'error'); return; }
@@ -630,7 +690,7 @@
     };
     const orderPayload = {
       items, shippingAddress, paymentMethod: 'razorpay',
-      subtotal: t.subtotal, shipping: t.shipping, tax: t.tax, discount: t.discount, total: t.total,
+      subtotal: t.sub, shipping: t.ship, tax: t.tax, discount: t.disc, total: t.total,
       note: ckShippingData.note || ''
     };
 
@@ -738,6 +798,20 @@
   function resetCheckout() {
     $$('.checkout-step-content').forEach(c => { c.style.display = ''; c.classList.remove('active'); });
     document.getElementById('checkoutConfirm').style.display = 'none';
+    state.selectedPayment = 'online';
+    const onlineOpt = document.getElementById('payOptOnline');
+    const codOpt = document.getElementById('payOptCOD');
+    if (onlineOpt) { onlineOpt.classList.add('active'); }
+    if (codOpt) { codOpt.classList.remove('active'); }
+    const payBtn = document.getElementById('payNowBtn');
+    if (payBtn) {
+      payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay Securely with Razorpay';
+      payBtn.style.background = '';
+      payBtn.style.boxShadow = '';
+      payBtn.disabled = false;
+    }
+    const codNote = document.getElementById('codNote');
+    if (codNote) codNote.style.display = 'none';
     closeCheckout();
   }
 
@@ -827,7 +901,9 @@
     document.getElementById('toStep3').addEventListener('click', () => goToStep(3));
     document.getElementById('backToStep1').addEventListener('click', () => goToStep(1));
     document.getElementById('backToStep2').addEventListener('click', () => goToStep(2));
-    document.getElementById('payNowBtn').addEventListener('click', initRazorpay);
+    document.getElementById('payNowBtn').addEventListener('click', () => {
+      if (state.selectedPayment === 'cod') { initCOD(); } else { initRazorpay(); }
+    });
     document.getElementById('ckContinueBtn').addEventListener('click', resetCheckout);
     document.getElementById('checkoutApplyCoupon').addEventListener('click', () => {
       const code = document.getElementById('checkoutCouponInput').value.trim().toUpperCase();
@@ -837,6 +913,28 @@
     });
     document.getElementById('editShipping').addEventListener('click', () => goToStep(2));
     document.getElementById('editSummary').addEventListener('click', () => goToStep(1));
+
+    /* Payment method switching */
+    document.querySelectorAll('.checkout-payment-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.checkout-payment-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        state.selectedPayment = opt.dataset.method;
+        const payBtn = document.getElementById('payNowBtn');
+        const codNote = document.getElementById('codNote');
+        if (state.selectedPayment === 'cod') {
+          payBtn.innerHTML = '<i class="fas fa-check-circle"></i> Place Order with COD';
+          payBtn.style.background = 'linear-gradient(135deg, #10B981, #059669)';
+          payBtn.style.boxShadow = '0 4px 16px rgba(16,185,129,.35)';
+          if (codNote) codNote.style.display = 'flex';
+        } else {
+          payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay Securely with Razorpay';
+          payBtn.style.background = '';
+          payBtn.style.boxShadow = '';
+          if (codNote) codNote.style.display = 'none';
+        }
+      });
+    });
 
     /* Auth Modal */
     D.loginBtn.addEventListener('click', openAuth);

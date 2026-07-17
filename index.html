@@ -258,14 +258,33 @@
         </div>
         <div class="checkout-payment-methods">
           <div class="checkout-payment-title"><i class="fas fa-credit-card"></i> Payment Method</div>
-          <div class="checkout-payment-option active">
+          <label class="checkout-payment-option active" data-method="online" id="payOptOnline">
+            <input type="radio" name="payMethod" value="online" checked style="display:none">
             <div class="checkout-payment-radio"></div>
+            <div class="checkout-payment-icon-wrap"><i class="fas fa-globe"></i></div>
             <div class="checkout-payment-info">
               <strong>Pay Online</strong>
-              <span>UPI, Cards, Netbanking, Wallets</span>
+              <span>UPI, Credit/Debit Cards, Netbanking, Wallets</span>
             </div>
             <div class="checkout-payment-logos">
               <span>UPI</span><span>Visa</span><span>MC</span><span>RuPay</span>
+            </div>
+          </label>
+          <label class="checkout-payment-option" data-method="cod" id="payOptCOD">
+            <input type="radio" name="payMethod" value="cod" style="display:none">
+            <div class="checkout-payment-radio"></div>
+            <div class="checkout-payment-icon-wrap cod-icon"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="checkout-payment-info">
+              <strong>Cash on Delivery</strong>
+              <span>Pay when your order arrives at your doorstep</span>
+            </div>
+            <div class="checkout-payment-badge">COD</div>
+          </label>
+          <div class="checkout-cod-note" id="codNote" style="display:none">
+            <i class="fas fa-info-circle"></i>
+            <div>
+              <strong>Cash on Delivery Available</strong>
+              <p>Please keep exact change ready. A nominal COD handling fee of ₹49 may apply. Available for orders up to ₹25,000.</p>
             </div>
           </div>
         </div>
