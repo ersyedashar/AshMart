@@ -475,6 +475,17 @@
   let ckCurrentStep = 1;
   let ckShippingData = {};
 
+  function lockScroll() {
+    state._scrollY = window.scrollY;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+  function unlockScroll() {
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    window.scrollTo(0, state._scrollY || 0);
+  }
+
   function openCheckout() {
     if (!state.cart.length) { notif('Your cart is empty', 'error'); return; }
     D.cartPanel.classList.remove('active');
@@ -483,19 +494,11 @@
     updateCkSteps();
     renderCheckoutSummary();
     D.checkoutPanel.classList.add('active');
-    D.body.style.overflow = 'hidden';
-    D.body.style.position = 'fixed';
-    D.body.style.width = '100%';
-    D.body.style.top = '-' + window.scrollY + 'px';
+    lockScroll();
   }
   function closeCheckout() {
-    const scrollY = D.body.style.top;
     D.checkoutPanel.classList.remove('active');
-    D.body.style.overflow = '';
-    D.body.style.position = '';
-    D.body.style.width = '';
-    D.body.style.top = '';
-    if (scrollY) window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    unlockScroll();
   }
 
   function goToStep(n) {
