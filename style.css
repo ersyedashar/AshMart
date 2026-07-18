@@ -1048,6 +1048,10 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
   .hamburger { display: flex; }
   .nav-auth-btn span { display: none; }
   .nav-auth-btn { width: 38px; padding: 0; justify-content: center; }
+  .nav-logo-mark { width: 30px; height: 30px; }
+  .nav-logo-text { font-size: 15px; }
+  .nav-logo-tagline { display: none; }
+  .nav-left { gap: 20px; }
   .hero { padding: 100px 0 30px; min-height: auto; }
   .hero-welcome { flex-wrap: wrap; justify-content: center; }
   .hero-founder-badge { margin-left: 0; }
@@ -1076,6 +1080,12 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
   .container { padding: 0 16px; }
 }
 @media (max-width: 480px) {
+  .nav-logo-mark { width: 26px; height: 26px; border-radius: 8px; }
+  .nav-logo-text { font-size: 14px; }
+  .nav-left { gap: 12px; }
+  .nav-right { gap: 2px; }
+  .nav-icon-btn { width: 34px; height: 34px; font-size: 14px; }
+  .theme-toggle { width: 34px; height: 34px; font-size: 14px; }
   .hero { padding: 80px 0 20px; min-height: auto; }
   .hero-content { gap: 16px; }
   .hero-welcome { font-size: 10px; padding: 6px 14px; flex-wrap: wrap; justify-content: center; }
