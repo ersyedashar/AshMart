@@ -202,7 +202,7 @@
     D.cartShipping.textContent = t.ship === 0 ? 'Free' : fmt(t.ship);
     D.cartTax.textContent = fmt(t.tax);
     D.cartDiscount.textContent = t.disc > 0 ? '- ' + fmt(t.disc) : fmt(0);
-    document.getElementById('cartGiftWrap').textContent = t.gw > 0 ? fmt(t.gw) : fmt(0);
+    const gwEl = document.getElementById('cartGiftWrap'); if (gwEl) gwEl.textContent = t.gw > 0 ? fmt(t.gw) : fmt(0);
     D.cartTotal.textContent = fmt(t.total);
   }
   window.__saCartQty = cartQty; window.__saCartRemove = cartRemove;
