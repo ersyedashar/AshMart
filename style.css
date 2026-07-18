@@ -119,7 +119,8 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
 .loader { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: opacity .6s, visibility .6s; }
 .loader.hidden { opacity: 0; visibility: hidden; }
 .loader-content { text-align: center; }
-.loader-logo { width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-family: var(--poppins); font-size: 28px; font-weight: 800; color: #fff; animation: loaderPulse 1.5s ease-in-out infinite; box-shadow: 0 0 40px var(--primary-glow); position: relative; }
+.loader-logo { width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 20px; display: flex; align-items: center; justify-content: center; animation: loaderPulse 1.5s ease-in-out infinite; box-shadow: 0 0 40px var(--primary-glow); position: relative; padding: 12px; }
+.loader-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
 .loader-logo::after { content: ''; position: absolute; inset: -4px; border-radius: 24px; background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent)); z-index: -1; opacity: .3; animation: loaderGlow 2s ease-in-out infinite; }
 @keyframes loaderGlow { 0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.6;transform:scale(1.05)} }
 @keyframes loaderPulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.05)} }
@@ -134,7 +135,7 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
 .nav-container { max-width: var(--max-w); margin: 0 auto; padding: 0 clamp(16px, 3vw, 40px); height: 100%; display: flex; align-items: center; justify-content: space-between; }
 .nav-left { display: flex; align-items: center; gap: 32px; }
 .nav-logo { display: flex; align-items: center; gap: 10px; font-family: var(--poppins); font-weight: 700; color: var(--text); }
-.nav-logo-mark { width: 34px; height: 34px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; font-weight: 800; box-shadow: 0 2px 10px var(--primary-glow); }
+.nav-logo-mark { width: 34px; height: 34px; border-radius: 10px; object-fit: contain; box-shadow: 0 2px 10px var(--primary-glow); }
 .nav-logo-text { font-size: 18px; letter-spacing: -.5px; }
 .nav-logo-tagline { font-size: 9px; color: var(--text-tertiary); letter-spacing: 1px; text-transform: uppercase; display: block; margin-top: -2px; }
 .nav-links { display: flex; align-items: center; gap: 2px; }
@@ -663,7 +664,7 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
 .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr; gap: 36px; }
 .footer-brand-col p { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin: 14px 0 18px; max-width: 320px; }
 .footer-logo { display: flex; align-items: center; gap: 10px; font-family: var(--poppins); font-size: 18px; font-weight: 700; }
-.footer-logo-mark { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; font-weight: 800; }
+.footer-logo-mark { width: 32px; height: 32px; border-radius: 9px; object-fit: contain; }
 .footer-social { display: flex; gap: 8px; margin-bottom: 18px; }
 .footer-social a { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--surface); color: var(--text-secondary); font-size: 14px; transition: all .2s var(--ease); border: 1px solid var(--border); }
 .footer-social a:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-2px); }
@@ -773,7 +774,7 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
 .auth-close { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--text-tertiary); transition: all .2s var(--ease); }
 .auth-close:hover { background: var(--danger-bg); color: var(--danger); }
 .auth-logo { margin-bottom: 24px; }
-.auth-logo-mark { display: inline-flex; width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; font-family: var(--poppins); font-weight: 800; font-size: 18px; align-items: center; justify-content: center; box-shadow: 0 4px 16px var(--primary-glow); }
+.auth-logo-mark { display: inline-flex; width: 52px; height: 52px; border-radius: 16px; object-fit: contain; box-shadow: 0 4px 16px var(--primary-glow); }
 .auth-form-wrap { display: none; }
 .auth-form-wrap.active { display: block; }
 .auth-form-wrap h2 { font-family: var(--poppins); font-size: 22px; font-weight: 700; margin-bottom: 4px; }

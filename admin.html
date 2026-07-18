@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AshMart Admin Dashboard</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -13,7 +14,7 @@
     body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
     .sidebar{width:260px;background:var(--bg2);border-right:1px solid var(--border);padding:24px 16px;position:fixed;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
     .sidebar-logo{display:flex;align-items:center;gap:12px;padding:0 8px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
-    .sidebar-logo .logo-icon{width:40px;height:40px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff}
+    .sidebar-logo .logo-icon{width:40px;height:40px;border-radius:10px;object-fit:contain}
     .sidebar-logo h1{font-size:18px;font-weight:700}
     .sidebar-logo span{font-size:11px;color:var(--text2);display:block}
     .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:14px;font-weight:500;transition:all .2s;margin-bottom:4px}
@@ -93,7 +94,7 @@
   <!-- LOGIN -->
   <div class="login-wrap" id="loginView">
     <div class="login-box">
-      <div style="text-align:center;margin-bottom:24px"><div style="width:56px;height:56px;background:var(--primary);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff">AM</div></div>
+      <div style="text-align:center;margin-bottom:24px"><img src="assets/logo.png" alt="AshMart" style="width:56px;height:56px;border-radius:14px;object-fit:contain"></div>
       <h2>Admin Dashboard</h2>
       <p>Sign in to manage AshMart</p>
       <form id="loginForm">
@@ -109,7 +110,7 @@
   <div id="dashboardView" style="display:none;width:100%;display:flex">
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <div class="logo-icon">AM</div>
+        <img src="assets/logo.png" alt="AshMart" class="logo-icon">
         <div><h1>AshMart</h1><span>Admin Panel</span></div>
       </div>
       <div class="nav-section">Main</div>
