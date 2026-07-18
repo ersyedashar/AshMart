@@ -3,17 +3,21 @@ const Product = require('../models/Product');
 
 exports.createOrder = async (req, res) => {
   try {
-    const { items, shipping, couponCode, discount } = req.body;
+    const { items, shippingAddress, shipping: shippingBody, paymentMethod, couponCode, discount, note } = req.body;
+    const shipping = shippingAddress || shippingBody;
     if (!items || !items.length || !shipping) {
       return res.status(400).json({ success: false, message: 'Items and shipping required' });
     }
     let subtotal = 0;
     const orderItems = [];
     for (const item of items) {
-      const product = await Product.findById(item.id);
-      if (!product) return res.status(404).json({ success: false, message: `Product not found: ${item.id}` });
-      subtotal += product.price * item.qty;
-      orderItems.push({ product: product._id, title: product.title, image: product.image, price: product.price, qty: item.qty });
+      const productId = item.product || item.id;
+      const qty = item.quantity || item.qty || 1;
+      const product = await Product.findById(productId);
+      if (!product) return res.status(404).json({ success: false, message: `Product not found: ${productId}` });
+      subtotal += product.price * qty;
+      orderItems.push({ product: product._id, title: product.title, image: product.image, price: product.price, qty });
+      await Product.findByIdAndUpdate(productId, { $inc: { stock: -qty, sold: qty } });
     }
     const disc = discount || 0;
     const taxable = subtotal - disc;
@@ -25,14 +29,24 @@ exports.createOrder = async (req, res) => {
     const order = await Order.create({
       user: req.user._id,
       items: orderItems,
-      shipping,
+      shipping: {
+        fullName: shipping.fullName || shipping.name,
+        phone: shipping.phone,
+        email: shipping.email,
+        address: shipping.address || shipping.street,
+        landmark: shipping.landmark,
+        city: shipping.city,
+        pincode: shipping.pincode,
+        state: shipping.state,
+        note: shipping.note || note || ''
+      },
       subtotal,
       shippingCost,
       tax,
       discount: disc,
       total,
       couponCode: couponCode || undefined,
-      payment: { method: req.body.paymentMethod || 'razorpay', status: 'pending' }
+      payment: { method: paymentMethod || 'razorpay', status: paymentMethod === 'cod' ? 'pending' : 'pending' }
     });
     res.status(201).json({ success: true, order });
   } catch (err) {

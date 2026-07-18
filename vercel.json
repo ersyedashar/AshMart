@@ -4,12 +4,7 @@
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "api.js", "use": "@vercel/static" },
     { "src": "script.js", "use": "@vercel/static" },
-    { "src": "style.css", "use": "@vercel/static" },
-    { "src": "cart.js", "use": "@vercel/static" },
-    { "src": "wishlist.js", "use": "@vercel/static" },
-    { "src": "compare.js", "use": "@vercel/static" },
-    { "src": "quickview.js", "use": "@vercel/static" },
-    { "src": "products.js", "use": "@vercel/static" }
+    { "src": "style.css", "use": "@vercel/static" }
   ],
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://ashmart-production.up.railway.app/api/:path*" }
