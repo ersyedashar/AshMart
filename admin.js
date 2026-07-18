@@ -1,5 +1,5 @@
 (() => {
-  const BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+  const BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://ashmart-api.onrender.com/api';
   let token = localStorage.getItem('am_admin_token') || null;
   let adminUser = null;
   let currentOrderPage = 1;

@@ -2,7 +2,7 @@
 const API = (() => {
   const BASE = window.location.hostname === 'localhost'
     ? 'http://localhost:5000/api'
-    : '/api';
+    : 'https://ashmart-api.onrender.com/api';
 
   let token = localStorage.getItem('am_token') || null;
   let user = null;
