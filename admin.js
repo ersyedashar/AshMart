@@ -122,7 +122,7 @@
       const pag = document.getElementById('ordersPagination');
       if (res.pages > 1) {
         let html = '';
-        for (let i = 1; i <= res.pages; i++) html += '<button class="btn btn-outline btn-sm' + (i === page ? ' btn-primary' : '') + '" onclick="window._loadOrders(' + i + ')">' + i + '</button>';
+        for (let i = 1; i <= res.pages; i++) html += '<button class="btn btn-outline btn-sm' + (i === page ? ' btn-primary' : '') + '" data-action="load-orders" data-page="' + i + '">' + i + '</button>';
         pag.innerHTML = html;
       } else { pag.innerHTML = ''; }
     } catch (e) { toast(e.message, 'error'); }
@@ -189,7 +189,7 @@
       const pag = document.getElementById('productsPagination');
       if (res.pages > 1) {
         let html = '';
-        for (let i = 1; i <= res.pages; i++) html += '<button class="btn btn-outline btn-sm' + (i === page ? ' btn-primary' : '') + '" onclick="window._loadProducts(' + i + ')">' + i + '</button>';
+        for (let i = 1; i <= res.pages; i++) html += '<button class="btn btn-outline btn-sm' + (i === page ? ' btn-primary' : '') + '" data-action="load-products" data-page="' + i + '">' + i + '</button>';
         pag.innerHTML = html;
       } else { pag.innerHTML = ''; }
     } catch (e) { toast(e.message, 'error'); }
@@ -240,6 +240,14 @@
   }
 
   /* ===== INIT ===== */
+  document.body.addEventListener('click', function(e) {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const page = parseInt(el.dataset.page);
+    if (el.dataset.action === 'load-orders' && page) loadOrders(page);
+    if (el.dataset.action === 'load-products' && page) loadProducts(page);
+  });
+
   const savedUser = localStorage.getItem('am_admin_user');
   if (token && savedUser) {
     try { adminUser = JSON.parse(savedUser); showDashboard(); } catch { showLogin(); }

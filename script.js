@@ -196,7 +196,7 @@
     D.cartFooter.style.display = 'block';
     D.cartItems.innerHTML = state.cart.map(i => {
       const p = products.find(x => x.id === i.id); if (!p) return '';
-      return `<div class="cart-item"><img src="${p.image}" alt="${p.title}" loading="lazy"><div class="cart-item-info"><h4>${p.title}</h4><div class="cart-item-price">${fmt(p.price)}</div><div class="cart-item-controls"><button onclick="window.__saCartQty(${p.id},-1)">−</button><span>${i.qty}</span><button onclick="window.__saCartQty(${p.id},1)">+</button></div></div><button class="cart-item-remove" onclick="window.__saCartRemove(${p.id})"><i class="fas fa-trash-alt"></i></button></div>`;
+      return `<div class="cart-item"><img src="${p.image}" alt="${p.title}" loading="lazy"><div class="cart-item-info"><h4>${p.title}</h4><div class="cart-item-price">${fmt(p.price)}</div><div class="cart-item-controls"><button data-action="cart-qty" data-id="${p.id}" data-delta="-1">−</button><span>${i.qty}</span><button data-action="cart-qty" data-id="${p.id}" data-delta="1">+</button></div></div><button class="cart-item-remove" data-action="cart-remove" data-id="${p.id}"><i class="fas fa-trash-alt"></i></button></div>`;
     }).join('');
     D.cartSubtotal.textContent = fmt(t.sub);
     D.cartShipping.textContent = t.ship === 0 ? 'Free' : fmt(t.ship);
@@ -222,7 +222,7 @@
     }
     D.wishlistItems.innerHTML = state.wishlist.map(id => {
       const p = products.find(x => x.id === id); if (!p) return '';
-      return `<div class="wishlist-item"><img src="${p.image}" alt="${p.title}" loading="lazy"><div class="wishlist-item-info"><h4>${p.title}</h4><div class="wishlist-item-price">${fmt(p.price)}</div><div class="wishlist-item-actions"><button class="wishlist-add-cart" onclick="window.__saCartAdd(${p.id})">Add to Cart</button><button class="wishlist-remove" onclick="window.__saWishlistToggle(${p.id})">Remove</button></div></div></div>`;
+      return `<div class="wishlist-item"><img src="${p.image}" alt="${p.title}" loading="lazy"><div class="wishlist-item-info"><h4>${p.title}</h4><div class="wishlist-item-price">${fmt(p.price)}</div><div class="wishlist-item-actions"><button class="wishlist-add-cart" data-action="cart-add" data-id="${p.id}">Add to Cart</button><button class="wishlist-remove" data-action="wishlist-toggle" data-id="${p.id}">Remove</button></div></div></div>`;
     }).join('');
   }
   function wishlistUpdateBtns() {
@@ -299,13 +299,13 @@
         <img src="${p.image}" alt="${p.title}" loading="lazy">
         <span class="product-card-badge ${p.badge}">${p.badgeText}</span>
         <div class="product-card-actions">
-          <button class="wl-btn ${inW?'active':''}" data-id="${p.id}" onclick="window.__saWishlistToggle(${p.id})" title="Wishlist"><i class="${inW?'fas':'far'} fa-heart"></i></button>
-          <button class="${inC?'active':''}" onclick="window.__saCompareToggle(${p.id})" title="Compare"><i class="fas fa-exchange-alt"></i></button>
-          <button onclick="window.__saQuickView(${p.id})" title="Quick View"><i class="fas fa-eye"></i></button>
+          <button class="wl-btn ${inW?'active':''}" data-id="${p.id}" data-action="wishlist-toggle" title="Wishlist"><i class="${inW?'fas':'far'} fa-heart"></i></button>
+          <button class="${inC?'active':''}" data-action="compare-toggle" data-id="${p.id}" title="Compare"><i class="fas fa-exchange-alt"></i></button>
+          <button data-action="quick-view" data-id="${p.id}" title="Quick View"><i class="fas fa-eye"></i></button>
         </div>
         <div class="product-card-overlay">
-          <button class="btn btn-primary btn-sm" onclick="window.__saCartAdd(${p.id})"><i class="fas fa-shopping-bag"></i> Add to Cart</button>
-          <button class="btn btn-outline btn-sm" onclick="window.__saQuickView(${p.id})"><i class="fas fa-eye"></i> View</button>
+          <button class="btn btn-primary btn-sm" data-action="cart-add" data-id="${p.id}"><i class="fas fa-shopping-bag"></i> Add to Cart</button>
+          <button class="btn btn-outline btn-sm" data-action="quick-view" data-id="${p.id}"><i class="fas fa-eye"></i> View</button>
         </div>
       </div>
       <div class="product-card-info">
@@ -430,7 +430,7 @@
     }).join('');
     const related = products.filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
     const relatedHtml = related.map(r => `
-      <div class="related-card" onclick="window.__saQuickView(${r.id})">
+      <div class="related-card" data-action="quick-view" data-id="${r.id}">
         <img src="${r.image}" alt="${r.title}" loading="lazy">
         <div class="related-info">
           <h4>${r.title.length > 28 ? r.title.substring(0, 28) + '...' : r.title}</h4>
@@ -443,13 +443,13 @@
     D.modalBody.innerHTML = `
       <div class="modal-gallery">
         <div class="modal-gallery-main">
-          <button class="modal-gallery-arrow modal-gallery-prev" onclick="window.__saGalleryNav(-1,${p.id})"><i class="fas fa-chevron-left"></i></button>
+          <button class="modal-gallery-arrow modal-gallery-prev" data-action="gallery-nav" data-dir="-1" data-id="${p.id}"><i class="fas fa-chevron-left"></i></button>
           <img src="${p.images[0]}" alt="${p.title}" class="modal-main-image" id="modalMainImage">
-          <button class="modal-gallery-arrow modal-gallery-next" onclick="window.__saGalleryNav(1,${p.id})"><i class="fas fa-chevron-right"></i></button>
+          <button class="modal-gallery-arrow modal-gallery-next" data-action="gallery-nav" data-dir="1" data-id="${p.id}"><i class="fas fa-chevron-right"></i></button>
           <span class="modal-gallery-counter" id="modalGalleryCounter">1 / ${p.images.length}</span>
           ${p.badge ? `<span class="modal-badge ${p.badge}">${p.badgeText}</span>` : ''}
         </div>
-        <div class="modal-thumbnails">${p.images.map((img,i) => `<img src="${img}" alt="${p.title} ${i+1}" class="modal-thumb ${i===0?'active':''}" onclick="window.__saGalleryGo(${i},${p.id})">`).join('')}</div>
+        <div class="modal-thumbnails">${p.images.map((img,i) => `<img src="${img}" alt="${p.title} ${i+1}" class="modal-thumb ${i===0?'active':''}" data-action="gallery-go" data-idx="${i}" data-id="${p.id}">`).join('')}</div>
       </div>
       <div class="modal-info">
         <div class="modal-category">${p.category}</div>
@@ -476,17 +476,17 @@
           <div class="modal-trust-item"><i class="fas fa-lock"></i> Secure Checkout</div>
         </div>
         <div class="modal-specs"><h4>Product Details</h4><div class="modal-specs-grid">${specsHtml}</div></div>
-        <div class="modal-colors"><h4>Colors</h4><div class="color-options">${p.colors.map((c,i) => `<button class="color-btn ${i===0?'active':''}" style="background:${c}" onclick="document.querySelectorAll('#modalBody .color-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')"></button>`).join('')}</div></div>
-        <div class="modal-sizes"><h4>Size</h4><div class="size-options">${p.sizes.map((s,i) => `<button class="size-btn ${i===0?'active':''}" onclick="document.querySelectorAll('#modalBody .size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">${s}</button>`).join('')}</div></div>
-        <div class="modal-quantity"><h4>Qty:</h4><button onclick="const e=this.nextElementSibling;let v=parseInt(e.textContent);if(v>1){v--;e.textContent=v}">−</button><span id="modalQty">1</span><button onclick="const e=this.previousElementSibling;let v=parseInt(e.textContent);v++;e.textContent=v">+</button></div>
+        <div class="modal-colors"><h4>Colors</h4><div class="color-options">${p.colors.map((c,i) => `<button class="color-btn ${i===0?'active':''}" style="background:${c}" data-action="select-color"></button>`).join('')}</div></div>
+        <div class="modal-sizes"><h4>Size</h4><div class="size-options">${p.sizes.map((s,i) => `<button class="size-btn ${i===0?'active':''}" data-action="select-size">${s}</button>`).join('')}</div></div>
+        <div class="modal-quantity"><h4>Qty:</h4><button data-action="modal-qty" data-delta="-1">−</button><span id="modalQty">1</span><button data-action="modal-qty" data-delta="1">+</button></div>
         <div class="modal-actions">
-          <button class="btn btn-primary" onclick="window.__saCartAdd(${p.id});window.__saCloseModal()"><i class="fas fa-shopping-bag"></i> Add to Cart</button>
-          <button class="modal-wishlist-btn ${inW?'active':''}" onclick="window.__saWishlistToggle(${p.id});window.__saQuickView(${p.id})" title="Wishlist"><i class="${inW?'fas':'far'} fa-heart"></i></button>
+          <button class="btn btn-primary" data-action="cart-add-close" data-id="${p.id}"><i class="fas fa-shopping-bag"></i> Add to Cart</button>
+          <button class="modal-wishlist-btn ${inW?'active':''}" data-action="wishlist-toggle-reopen" data-id="${p.id}" title="Wishlist"><i class="${inW?'fas':'far'} fa-heart"></i></button>
         </div>
         <div class="modal-share"><h4>Share this product</h4><div class="share-buttons">
           <a href="https://api.whatsapp.com/send?text=${shareText}%20${shareUrl}" target="_blank" class="share-btn share-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
           <a href="https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}" target="_blank" class="share-btn share-twitter"><i class="fab fa-twitter"></i> Twitter</a>
-          <button class="share-btn share-copy" onclick="navigator.clipboard.writeText(window.location.href);this.innerHTML='<i class=\\'fas fa-check\\'></i> Copied!';setTimeout(()=>this.innerHTML='<i class=\\'fas fa-link\\'></i> Copy Link',2000)"><i class="fas fa-link"></i> Copy Link</button>
+          <button class="share-btn share-copy" data-action="copy-link"><i class="fas fa-link"></i> Copy Link</button>
         </div></div>
         <div class="modal-reviews-section">
           <div class="modal-reviews-header">
@@ -531,7 +531,7 @@
     if (!query) { D.searchResults.classList.remove('visible'); D.searchSuggestions.style.display = 'block'; D.searchClear.classList.remove('visible'); return; }
     D.searchClear.classList.add('visible'); D.searchSuggestions.style.display = 'none';
     const r = products.filter(p => p.title.toLowerCase().includes(query) || p.category.toLowerCase().includes(query) || p.description.toLowerCase().includes(query));
-    D.searchResults.innerHTML = r.length ? r.map(p => `<div class="search-result-item" onclick="window.__saQuickView(${p.id});closeSearch()"><img src="${p.image}" alt="${p.title}" loading="lazy"><div class="result-info"><h4>${p.title}</h4><span>${p.category} · ${fmt(p.price)}</span></div></div>`).join('') : '<p style="text-align:center;color:var(--text-tertiary);padding:20px;">No products found</p>';
+    D.searchResults.innerHTML = r.length ? r.map(p => `<div class="search-result-item" data-action="quick-view-close-search" data-id="${p.id}"><img src="${p.image}" alt="${p.title}" loading="lazy"><div class="result-info"><h4>${p.title}</h4><span>${p.category} · ${fmt(p.price)}</span></div></div>`).join('') : '<p style="text-align:center;color:var(--text-tertiary);padding:20px;">No products found</p>';
     D.searchResults.classList.add('visible');
   }
 
@@ -1104,7 +1104,7 @@
         if (res.orders && res.orders.length) {
           let html = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px" id="orderHistoryModal">';
           html += '<div style="background:var(--bg);border-radius:16px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;position:relative">';
-          html += '<button onclick="document.getElementById(\'orderHistoryModal\').remove()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text)">&times;</button>';
+          html += '<button data-action="close-order-history" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text)">&times;</button>';
           html += '<h2 style="margin:0 0 16px;font-size:20px"><i class="fas fa-box" style="margin-right:8px;color:var(--primary)"></i>My Orders</h2>';
           res.orders.forEach(o => {
             const date = new Date(o.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
@@ -1216,6 +1216,104 @@
       a.addEventListener('click', function(e) {
         const t = this.getAttribute('href'); if (t && t.startsWith('#')) { e.preventDefault(); const el = document.querySelector(t); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
       });
+    });
+
+    /* ===== EVENT DELEGATION (replaces all inline onclick) ===== */
+    document.body.addEventListener('click', function(e) {
+      const el = e.target.closest('[data-action]');
+      if (!el) return;
+      const action = el.dataset.action;
+      const id = parseInt(el.dataset.id);
+      const delta = parseInt(el.dataset.delta);
+      const idx = parseInt(el.dataset.idx);
+
+      switch (action) {
+        case 'cart-add':
+          e.stopPropagation();
+          cartAdd(id);
+          break;
+        case 'cart-add-close':
+          e.stopPropagation();
+          cartAdd(id);
+          closeModal();
+          break;
+        case 'cart-qty':
+          e.stopPropagation();
+          cartQty(id, delta);
+          break;
+        case 'cart-remove':
+          e.stopPropagation();
+          cartRemove(id);
+          break;
+        case 'wishlist-toggle':
+          e.stopPropagation();
+          wishlistToggle(id);
+          break;
+        case 'wishlist-toggle-reopen':
+          e.stopPropagation();
+          wishlistToggle(id);
+          window.__saQuickView(id);
+          break;
+        case 'compare-toggle':
+          e.stopPropagation();
+          compareToggle(id);
+          break;
+        case 'quick-view':
+          e.stopPropagation();
+          window.__saQuickView(id);
+          break;
+        case 'quick-view-close-search':
+          e.stopPropagation();
+          window.__saQuickView(id);
+          closeSearch();
+          break;
+        case 'gallery-nav':
+          e.stopPropagation();
+          window.__saGalleryNav(delta, id);
+          break;
+        case 'gallery-go':
+          e.stopPropagation();
+          window.__saGalleryGo(idx, id);
+          break;
+        case 'select-color':
+          e.stopPropagation();
+          document.querySelectorAll('#modalBody .color-btn').forEach(b => b.classList.remove('active'));
+          el.classList.add('active');
+          break;
+        case 'select-size':
+          e.stopPropagation();
+          document.querySelectorAll('#modalBody .size-btn').forEach(b => b.classList.remove('active'));
+          el.classList.add('active');
+          break;
+        case 'modal-qty':
+          e.stopPropagation();
+          {
+            const qtySpan = el.id === 'modalQty' ? el : (delta < 0 ? el.nextElementSibling : el.previousElementSibling);
+            let v = parseInt(qtySpan.textContent);
+            v += delta;
+            if (v < 1) v = 1;
+            qtySpan.textContent = v;
+          }
+          break;
+        case 'copy-link':
+          e.stopPropagation();
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            el.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => { el.innerHTML = '<i class="fas fa-link"></i> Copy Link'; }, 2000);
+          });
+          break;
+        case 'close-order-history':
+          e.stopPropagation();
+          {
+            const modal = document.getElementById('orderHistoryModal');
+            if (modal) modal.remove();
+          }
+          break;
+        case 'toggle-view-all':
+          e.stopPropagation();
+          toggleViewAll();
+          break;
+      }
     });
   }
 
