@@ -983,8 +983,8 @@
       const data = await API.getProducts({ limit: 100 });
       if (data.products && data.products.length) {
         products.length = 0;
-        data.products.forEach(p => products.push({
-          id: parseInt(p._id.replace(/[^0-9]/g, '').substring(0, 8)) || products.length + 1,
+        data.products.forEach((p, i) => products.push({
+          id: i + 1,
           _id: p._id, title: p.title, category: p.category, price: p.price,
           originalPrice: p.originalPrice, rating: p.rating, reviews: p.reviews,
           badge: p.badge, badgeText: p.badgeText, image: p.image, images: p.images,
