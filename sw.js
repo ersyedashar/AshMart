@@ -1,10 +1,12 @@
-const CACHE_NAME = 'ashmart-v1';
+const CACHE_NAME = 'ashmart-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
   '/api.js',
+  '/admin.html',
+  '/admin.js',
   '/manifest.json',
   '/assets/logo.png'
 ];
@@ -47,7 +49,7 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       }).catch(() => cached);
-      return cached || fetched;
+      return fetched;
     })
   );
 });

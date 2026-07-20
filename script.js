@@ -228,10 +228,10 @@
   }
 
   async function cartRemove(id) {
+    const removed = state.cart.find(x => x.id === id);
     state.cart = state.cart.filter(x => x.id !== id);
     ls.set('cart', state.cart); cartRender();
     if (API.isLoggedIn()) {
-      const removed = state.cart.find(x => x.id === id);
       try { if (removed) await API.removeFromCart(removed.productRef || String(id)); } catch (e) { /* silent */ }
     }
   }
@@ -328,16 +328,41 @@
     D.compareBar.classList.toggle('active', state.compare.length >= 2);
   }
 
-  /* ===== NOTIFICATION ===== */
+  /* ===== NOTIFICATION (stacking) ===== */
+  const activeNotifs = [];
   function notif(msg, type = 'success') {
-    const n = D.notification;
-    n.textContent = '';
-    n.className = 'notification';
-    const i = document.createElement('i');
-    i.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
-    n.appendChild(i); n.appendChild(document.createTextNode(' ' + msg));
-    n.classList.add(type, 'show');
-    clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('show'), 3000);
+    const icons = { success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle', info: 'fas fa-info-circle', warning: 'fas fa-exclamation-triangle' };
+    const n = document.createElement('div');
+    n.className = 'notification ' + type;
+    n.innerHTML = '<i class="' + (icons[type] || icons.success) + '"></i><span>' + msg + '</span><button class="notif-close" aria-label="Dismiss">&times;</button>';
+    document.body.appendChild(n);
+    requestAnimationFrame(() => n.classList.add('show'));
+    const dismiss = () => { n.classList.remove('show'); n.classList.add('hiding'); setTimeout(() => n.remove(), 300); };
+    n.querySelector('.notif-close').addEventListener('click', dismiss);
+    n.addEventListener('click', dismiss);
+    const t = setTimeout(dismiss, 3500);
+    n._t = t;
+    activeNotifs.push(n);
+    if (activeNotifs.length > 4) { const old = activeNotifs.shift(); clearTimeout(old._t); old.remove(); }
+  }
+
+  /* ===== SKELETON LOADERS ===== */
+  function renderSkeletons(count) {
+    const grid = D.productsGrid;
+    grid.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const sk = document.createElement('div');
+      sk.className = 'skeleton-card';
+      sk.innerHTML = '<div class="sk-img"></div><div class="sk-body"><div class="sk-line w60"></div><div class="sk-line w80"></div><div class="sk-line w40"></div></div>';
+      grid.appendChild(sk);
+    }
+  }
+
+  /* ===== BUTTON LOADING STATE ===== */
+  function btnLoad(el, loading) {
+    if (!el) return;
+    if (loading) { el.classList.add('btn-loading'); el._origText = el.innerHTML; }
+    else { el.classList.remove('btn-loading'); if (el._origText) el.innerHTML = el._origText; }
   }
 
   /* ===== SOCIAL PROOF ===== */
@@ -1157,12 +1182,15 @@
       const email = document.getElementById('loginEmail').value.trim();
       const pass = document.getElementById('loginPass').value;
       if (!email || !pass) { showAuthError('loginError', 'Fill all fields'); return; }
+      const btn = D.authLoginForm.querySelector('button[type="submit"]');
+      btnLoad(btn, true);
       try {
         await API.login(email, pass);
         closeAuth(); updateAuthView(); notif('Signed in!', 'success');
         syncCartToBackend();
         loadServerWishlist();
       } catch (err) { showAuthError('loginError', err.message); }
+      btnLoad(btn, false);
     });
     D.authRegisterForm.addEventListener('submit', async (e) => {
       e.preventDefault(); clearAuthErrors();
@@ -1173,12 +1201,15 @@
       if (!name || !email || !phone || !pass) { showAuthError('registerError', 'Fill all fields'); return; }
       if (!/^[6-9]\d{9}$/.test(phone)) { showAuthError('registerError', 'Enter valid 10-digit phone'); return; }
       if (pass.length < 6) { showAuthError('registerError', 'Password min 6 characters'); return; }
+      const btn = D.authRegisterForm.querySelector('button[type="submit"]');
+      btnLoad(btn, true);
       try {
         await API.register(name, email, phone, pass);
         closeAuth(); updateAuthView(); notif('Account created!', 'success');
         syncCartToBackend();
         loadServerWishlist();
       } catch (err) { showAuthError('registerError', err.message); }
+      btnLoad(btn, false);
     });
     document.getElementById('logoutBtn').addEventListener('click', () => { API.logout(); updateAuthView(); closeAuth(); notif('Signed out', 'success'); });
     document.getElementById('viewOrdersBtn').addEventListener('click', async () => {
@@ -1410,30 +1441,44 @@
     });
   }
 
+  /* ===== KEYBOARD SHORTCUTS ===== */
+  function initKeyboardShortcuts() {
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); openSearch(); }
+      if (e.key === 'c' && !e.ctrlKey && !e.metaKey && !e.altKey) { D.cartPanel.classList.add('active'); }
+      if (e.key === 'w' && !e.ctrlKey && !e.metaKey && !e.altKey) { D.wishlistPanel.classList.add('active'); }
+    });
+  }
+
   /* ===== INIT ===== */
   async function init() {
-    cartInit();
-    wishlistInit();
+    const safe = (fn, label) => { try { fn(); } catch (e) { console.warn('Init error [' + label + ']:', e); } };
+    safe(cartInit, 'cart');
+    safe(wishlistInit, 'wishlist');
     API.loadFromStorage();
-    updateAuthView();
-    await loadProductsFromAPI();
-    renderProducts();
-    renderNewArrivals();
-    renderBestSellers();
-    renderTrending();
-    renderTestimonials();
-    initFaq();
-    initCountdown();
-    initSwipers();
-    initTilt();
-    initEvents();
-    heroParticles();
-    animateCounters();
-    updateScrollBtn();
-    renderRecentlyViewed();
-    startSocialProof();
-    setTimeout(initGsap, 150);
-    setTimeout(initAos, 250);
+    safe(updateAuthView, 'authView');
+    renderSkeletons(12);
+    try { await loadProductsFromAPI(); } catch (e) { console.warn('API products failed, using local'); }
+    safe(renderProducts, 'products');
+    safe(renderNewArrivals, 'newArrivals');
+    safe(renderBestSellers, 'bestSellers');
+    safe(renderTrending, 'trending');
+    safe(renderTestimonials, 'testimonials');
+    safe(initFaq, 'faq');
+    safe(initCountdown, 'countdown');
+    safe(initSwipers, 'swipers');
+    safe(initTilt, 'tilt');
+    safe(initEvents, 'events');
+    safe(heroParticles, 'particles');
+    safe(animateCounters, 'counters');
+    safe(updateScrollBtn, 'scrollBtn');
+    safe(renderRecentlyViewed, 'recentlyViewed');
+    safe(startSocialProof, 'socialProof');
+    safe(initKeyboardShortcuts, 'keyboard');
+    setTimeout(() => safe(initGsap, 'gsap'), 150);
+    setTimeout(() => safe(initAos, 'aos'), 250);
+    hideLoader();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

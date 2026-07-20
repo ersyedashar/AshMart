@@ -82,6 +82,7 @@
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; }
 body { font-family: var(--inter); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; transition: background .35s var(--ease), color .35s var(--ease); }
 img { max-width: 100%; height: auto; display: block; }
 a { text-decoration: none; color: inherit; transition: color .2s var(--ease); }
@@ -938,11 +939,7 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
 @media (max-width: 480px) { .scroll-btn { width: 40px; height: 40px; font-size: 14px; bottom: 16px; right: 16px; } }
 
 /* Notification */
-.notification { position: fixed; top: 90px; right: 20px; z-index: 5000; padding: 14px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); font-size: 13px; font-weight: 500; transform: translateX(120%); transition: transform .3s var(--ease); max-width: 320px; display: flex; align-items: center; gap: 10px; }
-.notification.show { transform: translateX(0); }
-.notification i { font-size: 16px; }
-.notification.success i { color: var(--secondary); }
-.notification.error i { color: var(--danger); }
+/* notification styles now at bottom of file */
 
 /* Social Proof Toast */
 .social-proof-toast { position: fixed; bottom: 24px; left: 24px; z-index: 999; display: flex; align-items: center; gap: 12px; padding: 12px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); transform: translateX(-120%); transition: transform .4s var(--ease); max-width: 380px; }
@@ -1197,6 +1194,43 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
   .checkout-success-details { padding: 10px; }
   .checkout-success-row { font-size: 11px; padding: 5px 0; }
 }
+/* ===== SKELETON LOADERS ===== */
+@keyframes skeletonShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.skeleton-card .sk-img { aspect-ratio: 1; background: linear-gradient(90deg, var(--bg-alt) 25%, var(--surface-hover) 50%, var(--bg-alt) 75%); background-size: 200% 100%; animation: skeletonShimmer 1.5s infinite; }
+.skeleton-card .sk-body { padding: 12px; }
+.skeleton-card .sk-line { height: 10px; border-radius: 4px; background: linear-gradient(90deg, var(--bg-alt) 25%, var(--surface-hover) 50%, var(--bg-alt) 75%); background-size: 200% 100%; animation: skeletonShimmer 1.5s infinite; margin-bottom: 8px; }
+.skeleton-card .sk-line.w60 { width: 60%; }
+.skeleton-card .sk-line.w80 { width: 80%; }
+.skeleton-card .sk-line.w40 { width: 40%; }
+
+/* ===== STACKING NOTIFICATIONS ===== */
+.notification { position: fixed; top: 80px; right: 20px; z-index: 5000; padding: 14px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); font-size: 13px; font-weight: 500; transform: translateX(120%); transition: transform .3s var(--ease), opacity .3s var(--ease); max-width: 320px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.notification.show { transform: translateX(0); }
+.notification.hiding { transform: translateX(120%); opacity: 0; }
+.notification i { font-size: 16px; }
+.notification.success i { color: var(--secondary); }
+.notification.error i { color: var(--danger); }
+.notification.info i { color: var(--info); }
+.notification.warning i { color: var(--accent); }
+.notification .notif-close { margin-left: auto; font-size: 14px; color: var(--text-tertiary); padding: 2px 6px; border-radius: 4px; transition: all .15s var(--ease); flex-shrink: 0; }
+.notification .notif-close:hover { background: var(--surface-hover); color: var(--text); }
+
+/* ===== LOADING SPINNERS ===== */
+.btn-loading { pointer-events: none; opacity: .7; position: relative; }
+.btn-loading::after { content: ''; position: absolute; width: 16px; height: 16px; border: 2px solid transparent; border-top-color: #fff; border-radius: 50%; animation: btnSpin .6s linear infinite; right: 14px; top: 50%; margin-top: -8px; }
+@keyframes btnSpin { to { transform: rotate(360deg); } }
+
+/* ===== BETTER EMPTY STATES ===== */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 48px 24px; color: var(--text-tertiary); }
+.empty-state .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: .4; }
+.empty-state h3 { font-size: 18px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+.empty-state p { font-size: 14px; max-width: 300px; margin-bottom: 20px; line-height: 1.5; }
+
+/* ===== FOCUS VISIBLE ===== */
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+
 @media (min-width: 1920px) {
   .container { max-width: 1400px; }
 }
