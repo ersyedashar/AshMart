@@ -1461,7 +1461,6 @@
     try { API.loadFromStorage(); } catch(e) { console.warn('loadFromStorage error:', e); }
     safe(updateAuthView, 'authView');
     safe(() => renderSkeletons(12), 'skeletons');
-    try { await loadProductsFromAPI(); } catch (e) { console.warn('API products failed, using local'); }
     safe(renderProducts, 'products');
     safe(renderNewArrivals, 'newArrivals');
     safe(renderBestSellers, 'bestSellers');
@@ -1478,6 +1477,14 @@
     safe(renderRecentlyViewed, 'recentlyViewed');
     safe(startSocialProof, 'socialProof');
     safe(initKeyboardShortcuts, 'keyboard');
+    loadProductsFromAPI().then(() => {
+      if (state.products.length) {
+        renderProducts();
+        renderNewArrivals();
+        renderBestSellers();
+        renderTrending();
+      }
+    }).catch(() => {});
     setTimeout(() => safe(initGsap, 'gsap'), 150);
     setTimeout(() => safe(initAos, 'aos'), 250);
     hideLoader();
