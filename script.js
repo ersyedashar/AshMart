@@ -93,6 +93,25 @@
     { name:'Sneha Gupta', avatar:'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&q=80', rating:5, text:'Absolutely worth every penny. Fastest delivery I have ever experienced.', date:'3 weeks ago', verified:false },
     { name:'Karthik Menon', avatar:'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80', rating:4, text:'Good product overall. A bit expensive but the quality justifies the price.', date:'3 weeks ago', verified:true }
   ];
+  async function fetchProductReviews(productId) {
+    if (API.isLoggedIn()) {
+      try {
+        const res = await API.getProductReviews(products.find(x=>x.id===productId)?._id || String(productId));
+        if (res.reviews && res.reviews.length) {
+          return res.reviews.map(r => ({
+            name: r.user?.name || 'User',
+            avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(r.user?.name || 'U') + '&background=2563EB&color=fff&size=100',
+            rating: r.rating,
+            text: r.text,
+            date: new Date(r.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short' }),
+            verified: r.verified
+          }));
+        }
+      } catch (e) { /* fallback to sample */ }
+    }
+    return getReviewsForProduct(productId);
+  }
+
   function getReviewsForProduct(pid) {
     const seed = pid * 7;
     const count = 3 + (seed % 3);
@@ -160,22 +179,62 @@
   D.html.setAttribute('data-theme', savedTheme);
 
   /* ===== CART ===== */
-  function cartInit() { state.cart = ls.get('cart', []); cartRender(); }
-  function cartAdd(id) {
+  function cartInit() { state.cart = ls.get('cart', []); cartRender(); syncCartToBackend(); }
+
+  async function syncCartToBackend() {
+    if (!API.isLoggedIn()) return;
+    try {
+      const res = await API.getCart();
+      if (res.cart && res.cart.items && res.cart.items.length) {
+        const serverItems = res.cart.items.map(i => ({
+          id: parseInt(i.product._id ? String(i.product._id).slice(-6) : '0'),
+          productRef: i.product._id,
+          qty: i.qty
+        }));
+        const localIds = new Set(state.cart.map(i => i.id));
+        for (const si of serverItems) {
+          const local = state.cart.find(i => i.productRef === si.productRef);
+          if (!local) state.cart.push({ id: si.id, productRef: si.productRef, qty: si.qty });
+        }
+        ls.set('cart', state.cart);
+      }
+    } catch (e) { /* silent */ }
+    cartRender();
+  }
+
+  async function cartAdd(id) {
     const p = products.find(x => x.id === id); if (!p) return;
     const e = state.cart.find(x => x.id === id);
     e ? e.qty++ : state.cart.push({ id, qty: 1 });
     ls.set('cart', state.cart); cartRender();
+    if (API.isLoggedIn()) {
+      try { await API.addToCart(p._id || String(id), 1); } catch (e) { /* silent */ }
+    }
     D.cartPanel.classList.add('active');
     notif('Added to cart!', 'success');
   }
-  function cartQty(id, d) {
+
+  async function cartQty(id, d) {
     const e = state.cart.find(x => x.id === id); if (!e) return;
     e.qty += d;
     if (e.qty <= 0) state.cart = state.cart.filter(x => x.id !== id);
     ls.set('cart', state.cart); cartRender();
+    if (API.isLoggedIn()) {
+      try {
+        if (e.qty <= 0) await API.removeFromCart(e.productRef || String(id));
+        else await API.updateCartItem(e.productRef || String(id), e.qty);
+      } catch (e) { /* silent */ }
+    }
   }
-  function cartRemove(id) { state.cart = state.cart.filter(x => x.id !== id); ls.set('cart', state.cart); cartRender(); }
+
+  async function cartRemove(id) {
+    state.cart = state.cart.filter(x => x.id !== id);
+    ls.set('cart', state.cart); cartRender();
+    if (API.isLoggedIn()) {
+      const removed = state.cart.find(x => x.id === id);
+      try { if (removed) await API.removeFromCart(removed.productRef || String(id)); } catch (e) { /* silent */ }
+    }
+  }
   function cartTotals() {
     const sub = state.cart.reduce((s,i) => { const p = products.find(x=>x.id===i.id); return s + (p?p.price*i.qty:0) }, 0);
     let disc = 0; if (state.discountApplied) disc = sub * 0.2;
@@ -208,11 +267,32 @@
   window.__saCartQty = cartQty; window.__saCartRemove = cartRemove;
 
   /* ===== WISHLIST ===== */
-  function wishlistInit() { state.wishlist = ls.get('wishlist', []); wishlistRender(); }
-  function wishlistToggle(id) {
+  function wishlistInit() { state.wishlist = ls.get('wishlist', []); wishlistRender(); loadServerWishlist(); }
+
+  async function loadServerWishlist() {
+    if (!API.isLoggedIn()) return;
+    try {
+      const res = await API.getMe();
+      if (res.user && res.user.wishlist) {
+        res.user.wishlist.forEach(p => {
+          const numId = parseInt(String(p._id || p).slice(-6), 16) || 0;
+          const match = products.find(x => x._id === String(p));
+          const id = match ? match.id : numId;
+          if (id && !state.wishlist.includes(id)) state.wishlist.push(id);
+        });
+        ls.set('wishlist', state.wishlist);
+        wishlistRender();
+      }
+    } catch (e) { /* silent */ }
+  }
+
+  async function wishlistToggle(id) {
     const i = state.wishlist.indexOf(id);
     i > -1 ? state.wishlist.splice(i,1) : state.wishlist.push(id);
     ls.set('wishlist', state.wishlist); wishlistRender(); wishlistUpdateBtns();
+    if (API.isLoggedIn()) {
+      try { await API.toggleServerWishlist(products.find(x=>x.id===id)?._id || String(id)); } catch (e) { /* silent */ }
+    }
   }
   function wishlistRender() {
     D.wishlistBadge.textContent = state.wishlist.length;
@@ -407,7 +487,7 @@
     const specsHtml = specs.map(s => `<div class="modal-spec-item"><span class="spec-label">${s.label}</span><span class="spec-value">${s.value}</span></div>`).join('');
     const deliveryDate = new Date(); deliveryDate.setDate(deliveryDate.getDate() + Math.floor(Math.random() * 4) + 3);
     const deliveryStr = deliveryDate.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
-    const reviews = getReviewsForProduct(p.id);
+    const reviews = await fetchProductReviews(p.id);
     const dist = renderStarDistribution(p.rating);
     const maxDist = Math.max(...dist);
     const reviewsHtml = reviews.map(r => `
@@ -1080,6 +1160,8 @@
       try {
         await API.login(email, pass);
         closeAuth(); updateAuthView(); notif('Signed in!', 'success');
+        syncCartToBackend();
+        loadServerWishlist();
       } catch (err) { showAuthError('loginError', err.message); }
     });
     D.authRegisterForm.addEventListener('submit', async (e) => {
@@ -1094,6 +1176,8 @@
       try {
         await API.register(name, email, phone, pass);
         closeAuth(); updateAuthView(); notif('Account created!', 'success');
+        syncCartToBackend();
+        loadServerWishlist();
       } catch (err) { showAuthError('registerError', err.message); }
     });
     document.getElementById('logoutBtn').addEventListener('click', () => { API.logout(); updateAuthView(); closeAuth(); notif('Signed out', 'success'); });

@@ -79,6 +79,9 @@
   });
 
   /* ===== DASHBOARD ===== */
+  let revenueChartInstance = null;
+  let categoryChartInstance = null;
+
   async function loadStats() {
     try {
       const res = await req('/admin/stats');
@@ -98,7 +101,68 @@
       const tbody = document.getElementById('recentOrdersBody');
       if (!s.recentOrders.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:24px">No orders yet</td></tr>'; return; }
       tbody.innerHTML = s.recentOrders.map(o => '<tr><td style="font-weight:600">#' + o.orderNumber + '</td><td>' + (o.user ? o.user.name : 'N/A') + '</td><td>' + fmt(o.total) + '</td><td><span class="badge badge-' + o.status + '">' + o.status + '</span></td><td>' + fmtDate(o.createdAt) + '</td></tr>').join('');
+
+      loadRevenueChart();
     } catch (e) { toast(e.message, 'error'); }
+  }
+
+  async function loadRevenueChart() {
+    try {
+      const res = await req('/admin/revenue-chart?days=30');
+      if (typeof Chart === 'undefined') return;
+
+      if (revenueChartInstance) revenueChartInstance.destroy();
+      if (categoryChartInstance) categoryChartInstance.destroy();
+
+      const labels = res.dailyRevenue.map(d => { const dt = new Date(d._id); return dt.getDate() + '/' + (dt.getMonth()+1); });
+      const revenues = res.dailyRevenue.map(d => d.revenue);
+      const orderCounts = res.dailyRevenue.map(d => d.orders);
+
+      revenueChartInstance = new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Revenue (₹)', data: revenues, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.4 },
+            { label: 'Orders', data: orderCounts, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true,
+          interaction: { intersect: false, mode: 'index' },
+          scales: {
+            y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+            y1: { beginAtZero: true, position: 'right', ticks: { color: '#94a3b8' }, grid: { display: false } },
+            x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+          },
+          plugins: { legend: { labels: { color: '#f1f5f9' } } }
+        }
+      });
+
+      if (res.categoryRevenue.length) {
+        const catLabels = res.categoryRevenue.map(c => c._id || 'Uncategorized');
+        const catRevenues = res.categoryRevenue.map(c => c.revenue);
+        const catColors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899'];
+        categoryChartInstance = new Chart(document.getElementById('categoryChart'), {
+          type: 'doughnut',
+          data: {
+            labels: catLabels,
+            datasets: [{ data: catRevenues, backgroundColor: catColors.slice(0, catLabels.length) }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { color: '#f1f5f9', padding: 12 } } }
+          }
+        });
+      }
+
+      if (res.topProducts.length) {
+        const topEl = document.getElementById('topProductsBody');
+        if (topEl.tagName === 'TBODY') {
+          topEl.innerHTML = res.topProducts.map(p => '<tr><td style="font-weight:500">' + p._id + '</td><td>' + p.totalSold + '</td><td>' + fmt(p.revenue) + '</td></tr>').join('');
+        }
+      }
+    } catch (e) { /* charts are optional */ }
   }
 
   /* ===== ORDERS ===== */
@@ -109,7 +173,12 @@
       const res = await req('/admin/orders?page=' + page + '&limit=15' + (status ? '&status=' + status : ''));
       const tbody = document.getElementById('ordersTableBody');
       if (!res.orders.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text2);padding:24px">No orders found</td></tr>'; return; }
-      tbody.innerHTML = res.orders.map(o => '<tr><td style="font-weight:600">#' + o.orderNumber + '</td><td>' + (o.user ? o.user.name : 'N/A') + '<br><span style="font-size:11px;color:var(--text2)">' + (o.user ? o.user.email : '') + '</span></td><td>' + o.items.length + ' item(s)</td><td>' + fmt(o.total) + '</td><td>' + (o.payment.method === 'cod' ? 'COD' : 'Online') + '</td><td><span class="badge badge-' + o.status + '">' + o.status + '</span></td><td>' + fmtDate(o.createdAt) + '</td><td><button class="btn btn-outline btn-sm update-status-btn" data-id="' + o._id + '" data-status="' + o.status + '"><i class="fas fa-edit"></i></button></td></tr>').join('');
+      tbody.innerHTML = res.orders.map(o => {
+        const trackingCell = o.tracking?.trackingNumber
+          ? '<span style="font-size:11px;color:var(--info)"><i class="fas fa-truck"></i> ' + (o.tracking.carrier || '') + '<br>' + o.tracking.trackingNumber + '</span>'
+          : '<span style="color:var(--text2);font-size:11px">—</span>';
+        return '<tr><td style="font-weight:600">#' + o.orderNumber + '</td><td>' + (o.user ? o.user.name : 'N/A') + '<br><span style="font-size:11px;color:var(--text2)">' + (o.user ? o.user.email : '') + '</span></td><td>' + o.items.length + ' item(s)</td><td>' + fmt(o.total) + '</td><td>' + (o.payment.method === 'cod' ? 'COD' : 'Online') + '</td><td>' + trackingCell + '</td><td><span class="badge badge-' + o.status + '">' + o.status + '</span></td><td>' + fmtDate(o.createdAt) + '</td><td><button class="btn btn-outline btn-sm update-status-btn" data-id="' + o._id + '" data-status="' + o.status + '"><i class="fas fa-edit"></i></button></td></tr>';
+      }).join('');
 
       document.querySelectorAll('.update-status-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -134,8 +203,15 @@
   document.getElementById('saveStatusBtn').addEventListener('click', async () => {
     const id = document.getElementById('statusOrderId').value;
     const status = document.getElementById('newStatus').value;
+    const body = { status };
+    if (status === 'shipped') {
+      body.carrier = document.getElementById('trackingCarrier').value;
+      body.trackingNumber = document.getElementById('trackingNumber').value;
+      body.trackingUrl = document.getElementById('trackingUrl').value;
+      body.estimatedDelivery = document.getElementById('trackingEta').value || undefined;
+    }
     try {
-      await req('/admin/orders/' + id + '/status', { method: 'PUT', body: JSON.stringify({ status }) });
+      await req('/admin/orders/' + id + '/status', { method: 'PUT', body: JSON.stringify(body) });
       document.getElementById('statusModal').classList.remove('show');
       toast('Order status updated');
       loadOrders(currentOrderPage);
@@ -144,6 +220,10 @@
 
   document.getElementById('cancelStatusBtn').addEventListener('click', () => document.getElementById('statusModal').classList.remove('show'));
   document.getElementById('closeStatusModal').addEventListener('click', () => document.getElementById('statusModal').classList.remove('show'));
+
+  document.getElementById('newStatus').addEventListener('change', function() {
+    document.getElementById('trackingFields').style.display = this.value === 'shipped' ? 'block' : 'none';
+  });
 
   /* ===== PRODUCTS ===== */
   async function loadProducts(page = 1) {

@@ -5,6 +5,7 @@ const admin = require('../controllers/adminController');
 router.use(protect, adminOnly);
 
 router.get('/stats', admin.getStats);
+router.get('/revenue-chart', admin.getRevenueChart);
 router.get('/orders', admin.getOrders);
 router.put('/orders/:id/status', admin.updateOrderStatus);
 router.get('/products', admin.getProducts);

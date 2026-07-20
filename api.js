@@ -82,6 +82,46 @@ const API = (() => {
       return request('/payment/key');
     },
 
+    async getCart() {
+      return request('/cart');
+    },
+
+    async syncCart(items) {
+      return request('/cart/sync', { method: 'POST', body: JSON.stringify({ items }) });
+    },
+
+    async addToCart(productId, qty = 1) {
+      return request('/cart/add', { method: 'POST', body: JSON.stringify({ productId, qty }) });
+    },
+
+    async updateCartItem(productId, qty) {
+      return request('/cart/' + productId, { method: 'PUT', body: JSON.stringify({ qty }) });
+    },
+
+    async removeFromCart(productId) {
+      return request('/cart/' + productId, { method: 'DELETE' });
+    },
+
+    async clearCart() {
+      return request('/cart', { method: 'DELETE' });
+    },
+
+    async getProductReviews(productId) {
+      return request('/reviews/product/' + productId);
+    },
+
+    async createReview(productId, rating, title, text) {
+      return request('/reviews/product/' + productId, { method: 'POST', body: JSON.stringify({ rating, title, text }) });
+    },
+
+    async deleteReview(reviewId) {
+      return request('/reviews/' + reviewId, { method: 'DELETE' });
+    },
+
+    async toggleServerWishlist(productId) {
+      return request('/auth/wishlist/' + productId, { method: 'POST' });
+    },
+
     logout() {
       token = null; user = null;
       localStorage.removeItem('am_token');

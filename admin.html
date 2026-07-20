@@ -138,6 +138,20 @@
           <div class="card-header"><h3><i class="fas fa-chart-pie" style="margin-right:8px;color:var(--primary)"></i> Orders by Status</h3></div>
           <div class="card-body" id="statusBreakdown" style="display:flex;gap:16px;flex-wrap:wrap"></div>
         </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px">
+          <div class="card">
+            <div class="card-header"><h3><i class="fas fa-chart-line" style="margin-right:8px;color:var(--primary)"></i> Revenue (Last 30 Days)</h3></div>
+            <div class="card-body"><canvas id="revenueChart" height="200"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3><i class="fas fa-chart-bar" style="margin-right:8px;color:var(--primary)"></i> Category Revenue</h3></div>
+            <div class="card-body"><canvas id="categoryChart" height="200"></canvas></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:24px">
+          <div class="card-header"><h3><i class="fas fa-trophy" style="margin-right:8px;color:var(--warning)"></i> Top Products</h3></div>
+          <div class="card-body" id="topProductsBody" style="padding:0"><table><thead><tr><th>Product</th><th>Sold</th><th>Revenue</th></tr></thead><tbody id="topProductsBody"></tbody></table></div>
+        </div>
         <div class="card">
           <div class="card-header"><h3><i class="fas fa-clock" style="margin-right:8px;color:var(--primary)"></i> Recent Orders</h3></div>
           <div class="card-body" style="padding:0"><table><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody id="recentOrdersBody"></tbody></table></div>
@@ -147,7 +161,7 @@
       <!-- ORDERS -->
       <div class="panel" id="orders">
         <div class="topbar"><h2>Orders</h2><div class="topbar-actions"><select id="orderFilter" style="padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px"><option value="">All Status</option><option value="placed">Placed</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div></div>
-        <div class="card"><div class="card-body" style="padding:0"><table><thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="ordersTableBody"></tbody></table></div></div>
+        <div class="card"><div class="card-body" style="padding:0"><table><thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Tracking</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="ordersTableBody"></tbody></table></div></div>
         <div style="display:flex;justify-content:center;gap:8px;margin-top:16px" id="ordersPagination"></div>
       </div>
 
@@ -196,16 +210,23 @@
 
   <!-- ORDER STATUS MODAL -->
   <div class="modal-overlay" id="statusModal">
-    <div class="modal" style="max-width:400px">
+    <div class="modal" style="max-width:500px">
       <div class="modal-header"><h3>Update Order Status</h3><button class="modal-close" id="closeStatusModal">&times;</button></div>
       <div class="modal-body">
         <input type="hidden" id="statusOrderId">
         <div class="form-group"><label>New Status</label><select id="newStatus"><option value="placed">Placed</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div>
+        <div id="trackingFields" style="display:none">
+          <div class="form-group"><label>Carrier</label><select id="trackingCarrier"><option value="Delhivery">Delhivery</option><option value="Blue Dart">Blue Dart</option><option value="DTDC">DTDC</option><option value="India Post">India Post</option><option value="EKart">EKart (Flipkart)</option><option value="Ecom Express">Ecom Express</option><option value="Shiprocket">Shiprocket</option></select></div>
+          <div class="form-group"><label>Tracking Number</label><input type="text" id="trackingNumber" placeholder="e.g. DHL1234567890"></div>
+          <div class="form-group"><label>Tracking URL (Optional)</label><input type="url" id="trackingUrl" placeholder="https://..."></div>
+          <div class="form-group"><label>Estimated Delivery</label><input type="date" id="trackingEta"></div>
+        </div>
       </div>
       <div class="modal-footer"><button class="btn btn-outline" id="cancelStatusBtn">Cancel</button><button class="btn btn-primary" id="saveStatusBtn"><i class="fas fa-save"></i> Update</button></div>
     </div>
   </div>
 
   <script src="admin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 </body>
 </html>

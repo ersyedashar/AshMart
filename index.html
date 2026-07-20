@@ -3,14 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#2563EB">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="description" content="AshMart - India's Premium Shopping Destination. Discover premium products, exclusive collections, COD, UPI, and fast PAN India delivery. Founded by SYED ASHAR ALI.">
   <meta name="keywords" content="AshMart, premium shopping, India, ecommerce, fashion, electronics, SYED ASHAR ALI, COD, UPI, online shopping India">
   <meta name="author" content="SYED ASHAR ALI">
   <title>AshMart - India's Premium Shopping Destination</title>
   <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563EB">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AshMart">
+  <link rel="apple-touch-icon" href="assets/logo.png">
+
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AshMart - India's Premium Shopping Destination">
+  <meta property="og:description" content="Discover premium products, exclusive collections, COD, UPI, and fast PAN India delivery.">
+  <meta property="og:image" content="assets/logo.png">
+  <meta property="og:site_name" content="AshMart">
+  <meta property="og:locale" content="en_IN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AshMart - India's Premium Shopping Destination">
+  <meta name="twitter:description" content="Premium products, secure payments, fast delivery across India.">
+  <meta name="twitter:image" content="assets/logo.png">
+  <link rel="canonical" href="https://ashmart.com/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "AshMart",
+    "url": "https://ashmart.com/",
+    "description": "India's Premium Shopping Destination",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://ashmart.com/#shop?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "AshMart",
+    "url": "https://ashmart.com/",
+    "logo": "https://ashmart.com/assets/logo.png",
+    "description": "India's Premium Shopping Destination",
+    "founder": {
+      "@type": "Person",
+      "name": "SYED ASHAR ALI"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Near Aliya Masjid, Zam Zam Colony",
+      "addressLocality": "Beed",
+      "addressRegion": "Maharashtra",
+      "postalCode": "431122",
+      "addressCountry": "IN"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+919404536365",
+      "contactType": "customer service"
+    }
+  }
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1004,5 +1061,12 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="api.js"></script>
   <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

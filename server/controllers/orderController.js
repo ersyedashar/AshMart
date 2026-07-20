@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const { sendEmail, orderConfirmation } = require('../utils/email');
 
 exports.createOrder = async (req, res) => {
   try {
@@ -15,6 +16,10 @@ exports.createOrder = async (req, res) => {
       const qty = item.quantity || item.qty || 1;
       const product = await Product.findById(productId);
       if (!product) return res.status(404).json({ success: false, message: `Product not found: ${productId}` });
+      if (product.stock < qty) {
+        return res.status(400).json({ success: false, message: `Insufficient stock for "${product.title}". Available: ${product.stock}, requested: ${qty}` });
+      }
+      if (qty < 1) return res.status(400).json({ success: false, message: 'Quantity must be at least 1' });
       subtotal += product.price * qty;
       orderItems.push({ product: product._id, title: product.title, image: product.image, price: product.price, qty });
       await Product.findByIdAndUpdate(productId, { $inc: { stock: -qty, sold: qty } });
@@ -49,6 +54,7 @@ exports.createOrder = async (req, res) => {
       payment: { method: paymentMethod || 'razorpay', status: paymentMethod === 'cod' ? 'pending' : 'pending' }
     });
     res.status(201).json({ success: true, order });
+    sendEmail(order.shipping.email, `Order Confirmed #${order.orderNumber} - AshMart`, orderConfirmation(order)).catch(() => {});
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

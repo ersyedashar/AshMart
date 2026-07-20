@@ -17,7 +17,7 @@ exports.createOrder = async (req, res) => {
     const { amount, orderId } = req.body;
     if (!amount || amount <= 0) return res.status(400).json({ success: false, message: 'Invalid amount' });
     const options = {
-      amount: Math.round(amount * 100),
+      amount: Math.round(amount),
       currency: 'INR',
       receipt: orderId || 'receipt_' + Date.now()
     };

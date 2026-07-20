@@ -39,6 +39,18 @@ const orderSchema = new mongoose.Schema({
     enum: ['placed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'returned'],
     default: 'placed'
   },
+  tracking: {
+    carrier: { type: String, default: '' },
+    trackingNumber: { type: String, default: '' },
+    trackingUrl: { type: String, default: '' },
+    estimatedDelivery: Date,
+    shippedAt: Date
+  },
+  statusHistory: [{
+    status: String,
+    date: { type: Date, default: Date.now },
+    note: String
+  }],
   deliveredAt: Date,
   cancelledAt: Date
 }, { timestamps: true });
