@@ -1089,14 +1089,15 @@
     try {
       const data = await API.getProducts({ limit: 100 });
       if (data.products && data.products.length) {
-        products.length = 0;
-        data.products.forEach((p, i) => products.push({
+        const mapped = data.products.map((p, i) => ({
           id: i + 1,
           _id: p._id, title: p.title, category: p.category, price: p.price,
           originalPrice: p.originalPrice, rating: p.rating, reviews: p.reviews,
           badge: p.badge, badgeText: p.badgeText, image: p.image, images: p.images,
           description: p.description, colors: p.colors, sizes: p.sizes, featured: p.featured
         }));
+        products.length = 0;
+        mapped.forEach(p => products.push(p));
         apiProductsLoaded = true;
         console.log('Loaded ' + products.length + ' products from API');
       }
@@ -1478,7 +1479,7 @@
     safe(startSocialProof, 'socialProof');
     safe(initKeyboardShortcuts, 'keyboard');
     loadProductsFromAPI().then(() => {
-      if (state.products.length) {
+      if (products.length) {
         renderProducts();
         renderNewArrivals();
         renderBestSellers();
