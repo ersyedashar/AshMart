@@ -142,7 +142,7 @@
     productsGrid: $('#productsGrid'), filterBtns: $$('.filter-btn'),
     newsletterForm: $('#newsletterForm'), newsletterInput: $('#newsletterInput'), newsletterMessage: $('#newsletterMessage'), footerNewsletterForm: $('#footerNewsletterForm'),
     contactForm: $('#contactForm'),
-    scrollBtn: $('#scrollBtn'), notification: $('#notification'),
+    scrollBtn: $('#scrollBtn'),
     checkoutPanel: $('#checkoutPanel'), checkoutClose: $('#checkoutClose'), checkoutBack: $('#checkoutBack'), checkoutOverlayBg: $('#checkoutOverlayBg'),
     authModal: $('#authModal'), authOverlay: $('#authOverlay'), authClose: $('#authClose'), loginBtn: $('#loginBtn'),
     authLoginWrap: $('#authLoginWrap'), authRegisterWrap: $('#authRegisterWrap'), authProfileWrap: $('#authProfileWrap'),
@@ -167,7 +167,7 @@
 
   /* ===== LOADER ===== */
   function hideLoader() { D.loader && D.loader.classList.add('hidden'); }
-  setTimeout(hideLoader, 1800);
+  setTimeout(hideLoader, 3000);
 
   /* ===== THEME ===== */
   D.themeToggle.addEventListener('click', () => {
