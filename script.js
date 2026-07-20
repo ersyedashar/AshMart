@@ -170,13 +170,15 @@
   setTimeout(hideLoader, 3000);
 
   /* ===== THEME ===== */
-  D.themeToggle.addEventListener('click', () => {
-    const next = D.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    D.html.setAttribute('data-theme', next);
-    ls.set('theme', next);
-  });
-  const savedTheme = ls.get('theme', 'light');
-  D.html.setAttribute('data-theme', savedTheme);
+  try {
+    D.themeToggle.addEventListener('click', () => {
+      const next = D.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      D.html.setAttribute('data-theme', next);
+      ls.set('theme', next);
+    });
+    const savedTheme = ls.get('theme', 'light');
+    D.html.setAttribute('data-theme', savedTheme);
+  } catch(e) { console.warn('Theme init error:', e); }
 
   /* ===== CART ===== */
   function cartInit() { state.cart = ls.get('cart', []); cartRender(); syncCartToBackend(); }
@@ -1456,9 +1458,9 @@
     const safe = (fn, label) => { try { fn(); } catch (e) { console.warn('Init error [' + label + ']:', e); } };
     safe(cartInit, 'cart');
     safe(wishlistInit, 'wishlist');
-    API.loadFromStorage();
+    try { API.loadFromStorage(); } catch(e) { console.warn('loadFromStorage error:', e); }
     safe(updateAuthView, 'authView');
-    renderSkeletons(12);
+    safe(() => renderSkeletons(12), 'skeletons');
     try { await loadProductsFromAPI(); } catch (e) { console.warn('API products failed, using local'); }
     safe(renderProducts, 'products');
     safe(renderNewArrivals, 'newArrivals');
