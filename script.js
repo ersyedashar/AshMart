@@ -488,7 +488,7 @@
   /* ===== PRODUCT DETAIL (QUICK VIEW) ===== */
   let currentGalleryIndex = 0;
   let currentModalProductId = null;
-  window.__saQuickView = function (id) {
+  window.__saQuickView = async function (id) {
     const p = products.find(x => x.id === id); if (!p) return;
     currentGalleryIndex = 0;
     currentModalProductId = id;
