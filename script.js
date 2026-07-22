@@ -136,6 +136,7 @@
     loader: $('#loader'),
     navbar: $('#navbar'), navLinks: $('#navLinks'), hamburger: $('#hamburger'), themeToggle: $('#themeToggle'),
     searchOverlay: $('#searchOverlay'), searchToggle: $('#searchToggle'), searchClose: $('#searchClose'), searchInput: $('#searchInput'), searchClear: $('#searchClear'), searchResults: $('#searchResults'), searchSuggestions: $('#searchSuggestions'),
+    navSearchBar: $('#navSearchBar'), navSearchInput: $('#navSearchInput'),
     cartPanel: $('#cartPanel'), cartToggle: $('#cartToggle'), cartClose: $('#cartClose'), cartOverlayBg: $('#cartOverlayBg'), cartItems: $('#cartItems'), cartFooter: $('#cartFooter'), cartBadge: $('#cartBadge'), cartCount: $('#cartCount'), cartSubtotal: $('#cartSubtotal'), cartShipping: $('#cartShipping'), cartTax: $('#cartTax'), cartDiscount: $('#cartDiscount'), cartTotal: $('#cartTotal'), couponInput: $('#couponInput'), applyCoupon: $('#applyCoupon'), cartContinue: $('#cartContinue'),
     wishlistPanel: $('#wishlistPanel'), wishlistToggle: $('#wishlistToggle'), wishlistClose: $('#wishlistClose'), wishlistOverlayBg: $('#wishlistOverlayBg'), wishlistItems: $('#wishlistItems'), wishlistBadge: $('#wishlistBadge'), wishlistCount: $('#wishlistCount'),
     productModal: $('#productModal'), modalClose: $('#modalClose'), modalOverlay: $('#modalOverlay'), modalBody: $('#modalBody'),
@@ -642,8 +643,8 @@
     D.searchResults.classList.add('visible');
   }
 
-  function openSearch() { D.searchOverlay.classList.add('active'); D.searchInput.focus(); D.body.style.overflow = 'hidden'; }
-  function closeSearch() { D.searchOverlay.classList.remove('active'); D.searchInput.value = ''; D.searchResults.classList.remove('visible'); D.searchSuggestions.style.display = 'block'; D.searchClear.classList.remove('visible'); D.body.style.overflow = ''; }
+  function openSearch() { D.searchOverlay.classList.add('active'); if (D.navSearchInput && D.navSearchInput.value) { D.searchInput.value = D.navSearchInput.value; search(D.navSearchInput.value); } D.searchInput.focus(); D.body.style.overflow = 'hidden'; }
+  function closeSearch() { D.searchOverlay.classList.remove('active'); D.searchInput.value = ''; D.searchResults.classList.remove('visible'); D.searchSuggestions.style.display = 'block'; D.searchClear.classList.remove('visible'); D.body.style.overflow = ''; if (D.navSearchInput) D.navSearchInput.blur(); }
   window.closeSearch = closeSearch;
 
   /* ===== COUNTDOWN ===== */
@@ -1112,8 +1113,15 @@
     D.hamburger.addEventListener('click', function() { this.classList.toggle('active'); D.navLinks.classList.toggle('active'); });
     D.navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { D.hamburger.classList.remove('active'); D.navLinks.classList.remove('active'); }));
 
+    /* Drawer Profile / Settings */
+    const drawerProfile = document.getElementById('drawerProfileBtn');
+    const drawerSettings = document.getElementById('drawerSettingsBtn');
+    if (drawerProfile) drawerProfile.addEventListener('click', e => { e.preventDefault(); D.hamburger.classList.remove('active'); D.navLinks.classList.remove('active'); D.loginBtn.click(); });
+    if (drawerSettings) drawerSettings.addEventListener('click', e => { e.preventDefault(); D.hamburger.classList.remove('active'); D.navLinks.classList.remove('active'); D.themeToggle.click(); });
+
     /* Search */
-    D.searchToggle.addEventListener('click', openSearch);
+    if (D.searchToggle) D.searchToggle.addEventListener('click', openSearch);
+    if (D.navSearchInput) D.navSearchInput.addEventListener('focus', openSearch);
     D.searchClose.addEventListener('click', closeSearch);
     D.searchOverlay.addEventListener('click', e => { if (e.target === D.searchOverlay) closeSearch(); });
     D.searchInput.addEventListener('input', e => search(e.target.value));

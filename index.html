@@ -75,7 +75,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(regs) {
@@ -104,7 +104,7 @@
         </button>
         <a href="#home" class="nav-logo" aria-label="AshMart Home">
           <img src="assets/logo.png" alt="AshMart" class="nav-logo-mark">
-          <div>
+          <div class="nav-logo-text-wrap">
             <span class="nav-logo-text">AshMart</span>
             <span class="nav-logo-tagline">Shop Smart. Live Better.</span>
           </div>
@@ -118,10 +118,15 @@
           <li><a href="#deals" class="nav-link">Deals</a></li>
           <li><a href="#about" class="nav-link">About</a></li>
           <li><a href="#contact" class="nav-link">Contact</a></li>
+          <li class="nav-drawer-extra"><a href="#" class="nav-link" id="drawerProfileBtn"><i class="fas fa-user-circle"></i> Profile</a></li>
+          <li class="nav-drawer-extra"><a href="#" class="nav-link" id="drawerSettingsBtn"><i class="fas fa-cog"></i> Settings</a></li>
         </ul>
       </div>
+      <div class="nav-search-bar" id="navSearchBar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="navSearchInput" placeholder="Search products..." autocomplete="off">
+      </div>
       <div class="nav-right">
-        <button class="nav-icon-btn" id="searchToggle" aria-label="Search"><i class="fas fa-search"></i></button>
         <button class="nav-icon-btn" id="wishlistToggle" aria-label="Wishlist"><i class="fas fa-heart"></i><span class="nav-badge wishlist-badge" id="wishlistBadge">0</span></button>
         <button class="nav-icon-btn" id="cartToggle" aria-label="Cart"><i class="fas fa-shopping-bag"></i><span class="nav-badge cart-badge" id="cartBadge">0</span></button>
         <div class="nav-divider"></div>
@@ -442,18 +447,17 @@
     <div class="hero-particles" id="heroParticles"></div>
     <div class="hero-content">
       <div class="hero-text">
-        <div class="hero-welcome"><i class="fas fa-sparkles"></i> Welcome to AshMart <span class="hero-founder-badge"><i class="fas fa-crown"></i> Founded by SYED ASHAR ALI</span></div>
+        <div class="hero-welcome"><i class="fas fa-sparkles"></i> Welcome to AshMart 👋<span class="hero-founder-badge"><i class="fas fa-crown"></i> Founded by Syed Ashar Ali</span></div>
         <h1 class="hero-title">
           <span class="hero-title-line">Shop Smarter.</span>
           <span class="hero-title-line hero-title-gradient">Live Better.</span>
         </h1>
         <p class="hero-sub">Your trusted destination for quality products, smart shopping, and an unforgettable online experience.</p>
-        <p class="hero-sub-support">Discover carefully selected products, secure payments, fast delivery, and exceptional service — all in one place.</p>
         <div class="hero-buttons">
-          <a href="#shop" class="btn btn-primary hero-btn">
+          <a href="#shop" class="btn btn-primary hero-btn hero-btn-primary">
             Explore Products <i class="fas fa-arrow-right"></i>
           </a>
-          <a href="#categories" class="btn btn-outline hero-btn">
+          <a href="#categories" class="btn btn-outline hero-btn hero-btn-outline">
             Start Shopping <i class="fas fa-bag-shopping"></i>
           </a>
         </div>
@@ -468,7 +472,18 @@
       <div class="hero-visual">
         <div class="hero-image-wrapper">
           <div class="hero-glow-ring"></div>
-          <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80" alt="Premium shopping experience" class="hero-main-img" loading="eager">
+          <div class="hero-collage">
+            <div class="hero-collage-main">
+              <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&q=80" alt="Premium shopping" loading="eager">
+              <div class="hero-collage-label"><i class="fas fa-star"></i> Premium Collection</div>
+            </div>
+            <div class="hero-collage-grid">
+              <div class="hero-collage-item"><img src="https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=200&q=80" alt="Electronics" loading="eager"><span><i class="fas fa-laptop"></i> Electronics</span></div>
+              <div class="hero-collage-item"><img src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=200&q=80" alt="Fashion" loading="eager"><span><i class="fas fa-tshirt"></i> Fashion</span></div>
+              <div class="hero-collage-item"><img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=80" alt="Home" loading="eager"><span><i class="fas fa-home"></i> Home</span></div>
+              <div class="hero-collage-item"><img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=200&q=80" alt="Accessories" loading="eager"><span><i class="fas fa-glasses"></i> Accessories</span></div>
+            </div>
+          </div>
           <div class="hero-float-card hfc-1">
             <div class="hero-float-card-icon"><i class="fas fa-fire"></i></div>
             <div class="hero-float-card-text"><strong>Trending</strong><span>Top picks today</span></div>
@@ -1064,6 +1079,6 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="api.js?v=4"></script>
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
