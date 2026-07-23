@@ -1,11 +1,21 @@
 const User = require('../models/User');
 
+function isStrongPassword(pw) {
+  if (pw.length < 8) return 'Password must be at least 8 characters';
+  if (!/[A-Z]/.test(pw)) return 'Password must contain at least one uppercase letter';
+  if (!/[a-z]/.test(pw)) return 'Password must contain at least one lowercase letter';
+  if (!/[0-9]/.test(pw)) return 'Password must contain at least one number';
+  return null;
+}
+
 exports.register = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
     if (!name || !email || !phone || !password) {
       return res.status(400).json({ success: false, message: 'All fields required' });
     }
+    const pwError = isStrongPassword(password);
+    if (pwError) return res.status(400).json({ success: false, message: pwError });
     const exists = await User.findOne({ $or: [{ email }, { phone }] });
     if (exists) return res.status(400).json({ success: false, message: 'Email or phone already registered' });
     const user = await User.create({ name, email, phone, password });

@@ -5,6 +5,8 @@
   let currentOrderPage = 1;
   let currentProductPage = 1;
 
+  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
   async function req(endpoint, opts = {}) {
     const h = { 'Content-Type': 'application/json', ...opts.headers };
     if (token) h['Authorization'] = 'Bearer ' + token;
@@ -100,7 +102,7 @@
 
       const tbody = document.getElementById('recentOrdersBody');
       if (!s.recentOrders.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:24px">No orders yet</td></tr>'; return; }
-      tbody.innerHTML = s.recentOrders.map(o => '<tr><td style="font-weight:600">#' + o.orderNumber + '</td><td>' + (o.user ? o.user.name : 'N/A') + '</td><td>' + fmt(o.total) + '</td><td><span class="badge badge-' + o.status + '">' + o.status + '</span></td><td>' + fmtDate(o.createdAt) + '</td></tr>').join('');
+      tbody.innerHTML = s.recentOrders.map(o => '<tr><td style="font-weight:600">#' + escapeHtml(o.orderNumber) + '</td><td>' + escapeHtml(o.user ? o.user.name : 'N/A') + '</td><td>' + fmt(o.total) + '</td><td><span class="badge badge-' + escapeHtml(o.status) + '">' + escapeHtml(o.status) + '</span></td><td>' + fmtDate(o.createdAt) + '</td></tr>').join('');
 
       loadRevenueChart();
     } catch (e) { toast(e.message, 'error'); }
@@ -159,7 +161,7 @@
       if (res.topProducts.length) {
         const topEl = document.getElementById('topProductsBody');
         if (topEl.tagName === 'TBODY') {
-          topEl.innerHTML = res.topProducts.map(p => '<tr><td style="font-weight:500">' + p._id + '</td><td>' + p.totalSold + '</td><td>' + fmt(p.revenue) + '</td></tr>').join('');
+          topEl.innerHTML = res.topProducts.map(p => '<tr><td style="font-weight:500">' + escapeHtml(p._id) + '</td><td>' + p.totalSold + '</td><td>' + fmt(p.revenue) + '</td></tr>').join('');
         }
       }
     } catch (e) { /* charts are optional */ }
@@ -175,9 +177,9 @@
       if (!res.orders.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text2);padding:24px">No orders found</td></tr>'; return; }
       tbody.innerHTML = res.orders.map(o => {
         const trackingCell = o.tracking?.trackingNumber
-          ? '<span style="font-size:11px;color:var(--info)"><i class="fas fa-truck"></i> ' + (o.tracking.carrier || '') + '<br>' + o.tracking.trackingNumber + '</span>'
+          ? '<span style="font-size:11px;color:var(--info)"><i class="fas fa-truck"></i> ' + escapeHtml(o.tracking.carrier || '') + '<br>' + escapeHtml(o.tracking.trackingNumber) + '</span>'
           : '<span style="color:var(--text2);font-size:11px">—</span>';
-        return '<tr><td style="font-weight:600">#' + o.orderNumber + '</td><td>' + (o.user ? o.user.name : 'N/A') + '<br><span style="font-size:11px;color:var(--text2)">' + (o.user ? o.user.email : '') + '</span></td><td>' + o.items.length + ' item(s)</td><td>' + fmt(o.total) + '</td><td>' + (o.payment.method === 'cod' ? 'COD' : 'Online') + '</td><td>' + trackingCell + '</td><td><span class="badge badge-' + o.status + '">' + o.status + '</span></td><td>' + fmtDate(o.createdAt) + '</td><td><button class="btn btn-outline btn-sm update-status-btn" data-id="' + o._id + '" data-status="' + o.status + '"><i class="fas fa-edit"></i></button></td></tr>';
+        return '<tr><td style="font-weight:600">#' + escapeHtml(o.orderNumber) + '</td><td>' + escapeHtml(o.user ? o.user.name : 'N/A') + '<br><span style="font-size:11px;color:var(--text2)">' + escapeHtml(o.user ? o.user.email : '') + '</span></td><td>' + o.items.length + ' item(s)</td><td>' + fmt(o.total) + '</td><td>' + (o.payment.method === 'cod' ? 'COD' : 'Online') + '</td><td>' + trackingCell + '</td><td><span class="badge badge-' + escapeHtml(o.status) + '">' + escapeHtml(o.status) + '</span></td><td>' + fmtDate(o.createdAt) + '</td><td><button class="btn btn-outline btn-sm update-status-btn" data-id="' + o._id + '" data-status="' + escapeHtml(o.status) + '"><i class="fas fa-edit"></i></button></td></tr>';
       }).join('');
 
       document.querySelectorAll('.update-status-btn').forEach(btn => {
@@ -232,7 +234,7 @@
       const res = await req('/admin/products?page=' + page + '&limit=15');
       const tbody = document.getElementById('productsTableBody');
       if (!res.products.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text2);padding:24px">No products found</td></tr>'; return; }
-      tbody.innerHTML = res.products.map(p => '<tr><td><img src="' + p.image + '" class="product-thumb"></td><td style="font-weight:500">' + p.title + '</td><td style="text-transform:capitalize">' + p.category + '</td><td>' + fmt(p.price) + '</td><td>' + (p.stock || 0) + '</td><td>' + (p.featured ? '<span style="color:var(--success)"><i class="fas fa-check-circle"></i></span>' : '<span style="color:var(--text2)"><i class="fas fa-times-circle"></i></span>') + '</td><td><button class="btn btn-outline btn-sm edit-product-btn" data-id="' + p._id + '"><i class="fas fa-edit"></i></button> <button class="btn btn-danger btn-sm delete-product-btn" data-id="' + p._id + '"><i class="fas fa-trash"></i></button></td></tr>').join('');
+      tbody.innerHTML = res.products.map(p => '<tr><td><img src="' + escapeHtml(p.image) + '" class="product-thumb"></td><td style="font-weight:500">' + escapeHtml(p.title) + '</td><td style="text-transform:capitalize">' + escapeHtml(p.category) + '</td><td>' + fmt(p.price) + '</td><td>' + (p.stock || 0) + '</td><td>' + (p.featured ? '<span style="color:var(--success)"><i class="fas fa-check-circle"></i></span>' : '<span style="color:var(--text2)"><i class="fas fa-times-circle"></i></span>') + '</td><td><button class="btn btn-outline btn-sm edit-product-btn" data-id="' + p._id + '"><i class="fas fa-edit"></i></button> <button class="btn btn-danger btn-sm delete-product-btn" data-id="' + p._id + '"><i class="fas fa-trash"></i></button></td></tr>').join('');
 
       document.querySelectorAll('.edit-product-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -315,7 +317,7 @@
       const res = await req('/admin/users');
       const tbody = document.getElementById('usersTableBody');
       if (!res.users.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:24px">No users found</td></tr>'; return; }
-      tbody.innerHTML = res.users.map(u => '<tr><td style="font-weight:500">' + u.name + '</td><td>' + u.email + '</td><td>' + (u.phone || '-') + '</td><td><span class="badge badge-' + (u.role === 'admin' ? 'confirmed' : 'placed') + '">' + u.role + '</span></td><td>' + fmtDate(u.createdAt) + '</td></tr>').join('');
+      tbody.innerHTML = res.users.map(u => '<tr><td style="font-weight:500">' + escapeHtml(u.name) + '</td><td>' + escapeHtml(u.email) + '</td><td>' + escapeHtml(u.phone || '-') + '</td><td><span class="badge badge-' + (u.role === 'admin' ? 'confirmed' : 'placed') + '">' + escapeHtml(u.role) + '</span></td><td>' + fmtDate(u.createdAt) + '</td></tr>').join('');
     } catch (e) { toast(e.message, 'error'); }
   }
 

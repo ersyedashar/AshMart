@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="AshMart - India's Premium Shopping Destination. Discover premium products, exclusive collections, COD, UPI, and fast PAN India delivery. Founded by SYED ASHAR ALI.">
   <meta name="keywords" content="AshMart, premium shopping, India, ecommerce, fashion, electronics, SYED ASHAR ALI, COD, UPI, online shopping India">
   <meta name="author" content="SYED ASHAR ALI">
@@ -19,13 +19,13 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="AshMart - India's Premium Shopping Destination">
   <meta property="og:description" content="Discover premium products, exclusive collections, COD, UPI, and fast PAN India delivery.">
-  <meta property="og:image" content="assets/logo.png">
+  <meta property="og:image" content="https://ashmart.com/assets/logo.png">
   <meta property="og:site_name" content="AshMart">
   <meta property="og:locale" content="en_IN">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="AshMart - India's Premium Shopping Destination">
   <meta name="twitter:description" content="Premium products, secure payments, fast delivery across India.">
-  <meta name="twitter:image" content="assets/logo.png">
+  <meta name="twitter:image" content="https://ashmart.com/assets/logo.png">
   <link rel="canonical" href="https://ashmart.com/">
   <script type="application/ld+json">
   {
@@ -68,8 +68,46 @@
     }
   }
   </script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What payment methods do you accept?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We accept Cash on Delivery (COD), UPI, PhonePe, Google Pay, Paytm, RuPay, Visa, Mastercard, and all major Indian payment methods."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does shipping take?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "PAN India delivery in 3-7 business days. Express shipping available in 1-2 business days. Free shipping on orders over ₹5,000."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is your return policy?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "30-day hassle-free returns. Items must be unused in original packaging. Refunds processed within 5-7 business days."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can I track my order?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Once shipped, you will receive a tracking number via email. Track in real-time through your account or our tracking page."
+        }
+      }
+    ]
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -78,8 +116,8 @@
   <link rel="stylesheet" href="style.css?v=6">
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(regs) {
-        regs.forEach(function(r) { r.unregister(); });
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').catch(function() {});
       });
     }
   </script>
@@ -442,6 +480,7 @@
   </div>
 
   <!-- HERO -->
+  <main role="main" id="main-content">
   <section class="hero" id="home" aria-label="Hero">
     <div class="hero-gradient"></div>
     <div class="hero-particles" id="heroParticles"></div>
@@ -1013,6 +1052,7 @@
       </div>
     </div>
   </section>
+  </main>
 
   <!-- FOOTER -->
   <footer class="footer" role="contentinfo">

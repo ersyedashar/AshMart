@@ -3,6 +3,31 @@
 (function () {
   'use strict';
 
+  /* ===== GLOBAL ERROR HANDLER ===== */
+  window.onerror = function(msg, src, line, col, err) {
+    console.error('[AshMart Error]', msg, src, line + ':' + col, err);
+    return false;
+  };
+  window.addEventListener('unhandledrejection', function(e) {
+    console.error('[AshMart Unhandled Promise]', e.reason);
+  });
+
+  /* ===== OFFLINE DETECTION ===== */
+  let offlineBanner = null;
+  function showOfflineBanner() {
+    if (offlineBanner) return;
+    offlineBanner = document.createElement('div');
+    offlineBanner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#ef4444;color:#fff;text-align:center;padding:10px;font-size:14px;font-weight:600;';
+    offlineBanner.textContent = 'You are offline. Some features may be unavailable.';
+    document.body.appendChild(offlineBanner);
+  }
+  function hideOfflineBanner() {
+    if (offlineBanner) { offlineBanner.remove(); offlineBanner = null; }
+  }
+  window.addEventListener('offline', showOfflineBanner);
+  window.addEventListener('online', hideOfflineBanner);
+  if (!navigator.onLine) showOfflineBanner();
+
   const $ = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 
@@ -164,6 +189,7 @@
   const stars = r => '<i class="fas fa-star"></i>'.repeat(Math.floor(r)) + (r%1>=.5?'<i class="fas fa-star-half-alt"></i>':'') + '<i class="far fa-star"></i>'.repeat(5-Math.ceil(r));
   const disc = (o,c) => Math.round((o-c)/o*100);
   const ls = { get(k,d){try{return JSON.parse(localStorage.getItem('am_'+k))||d}catch{return d}}, set(k,v){try{localStorage.setItem('am_'+k,JSON.stringify(v))}catch{}} };
+  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   state.recentlyViewed = ls.get('recentlyViewed', []);
 
   /* ===== LOADER ===== */
@@ -201,17 +227,18 @@
         }
         ls.set('cart', state.cart);
       }
-    } catch (e) { /* silent */ }
+    } catch (e) { console.warn('[AshMart] Cart sync failed:', e.message); }
     cartRender();
   }
 
   async function cartAdd(id) {
     const p = products.find(x => x.id === id); if (!p) return;
-    const e = state.cart.find(x => x.id === id);
-    e ? e.qty++ : state.cart.push({ id, qty: 1 });
+    const existing = state.cart.find(x => x.id === id);
+    if (existing && p.stock && existing.qty >= p.stock) { notif('Only ' + p.stock + ' available in stock', 'warning'); return; }
+    existing ? existing.qty++ : state.cart.push({ id, qty: 1 });
     ls.set('cart', state.cart); cartRender();
     if (API.isLoggedIn()) {
-      try { await API.addToCart(p._id || String(id), 1); } catch (e) { /* silent */ }
+      try { await API.addToCart(p._id || String(id), 1); } catch (e) { console.warn('[AshMart] Add to cart API failed:', e.message); }
     }
     D.cartPanel.classList.add('active');
     notif('Added to cart!', 'success');
@@ -219,6 +246,8 @@
 
   async function cartQty(id, d) {
     const e = state.cart.find(x => x.id === id); if (!e) return;
+    const p = products.find(x => x.id === id);
+    if (d > 0 && p && p.stock && e.qty >= p.stock) { notif('Only ' + p.stock + ' available in stock', 'warning'); return; }
     e.qty += d;
     if (e.qty <= 0) state.cart = state.cart.filter(x => x.id !== id);
     ls.set('cart', state.cart); cartRender();
@@ -226,7 +255,7 @@
       try {
         if (e.qty <= 0) await API.removeFromCart(e.productRef || String(id));
         else await API.updateCartItem(e.productRef || String(id), e.qty);
-      } catch (e) { /* silent */ }
+      } catch (e) { console.warn('[AshMart] Cart update API failed:', e.message); }
     }
   }
 
@@ -235,7 +264,7 @@
     state.cart = state.cart.filter(x => x.id !== id);
     ls.set('cart', state.cart); cartRender();
     if (API.isLoggedIn()) {
-      try { if (removed) await API.removeFromCart(removed.productRef || String(id)); } catch (e) { /* silent */ }
+      try { if (removed) await API.removeFromCart(removed.productRef || String(id)); } catch (e) { console.warn('[AshMart] Cart remove API failed:', e.message); }
     }
   }
   function cartTotals() {
@@ -243,7 +272,7 @@
     let disc = 0; if (state.discountApplied) disc = sub * 0.2;
     const taxable = sub - disc;
     let ship = 0; if (state.cart.length && sub < 2000) ship = 199; else if (state.cart.length && sub < 5000) ship = 99;
-    const tax = taxable * 0.08;
+    const tax = Math.round(taxable * 0.08);
     const gw = state.giftWrap ? 49 : 0;
     return { sub, disc, ship, tax, total: taxable + tax + ship + gw, gw, count: state.cart.reduce((s,i)=>s+i.qty,0) };
   }
@@ -258,7 +287,7 @@
     D.cartFooter.style.display = 'block';
     D.cartItems.innerHTML = state.cart.map(i => {
       const p = products.find(x => x.id === i.id); if (!p) return '';
-      return `<div class="cart-item"><img src="${p.image}" alt="${p.title}" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&q=80'"><div class="cart-item-info"><h4>${p.title}</h4><div class="cart-item-price">${fmt(p.price)}</div><div class="cart-item-controls"><button data-action="cart-qty" data-id="${p.id}" data-delta="-1">−</button><span>${i.qty}</span><button data-action="cart-qty" data-id="${p.id}" data-delta="1">+</button></div></div><button class="cart-item-remove" data-action="cart-remove" data-id="${p.id}"><i class="fas fa-trash-alt"></i></button></div>`;
+      return `<div class="cart-item"><img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&q=80'"><div class="cart-item-info"><h4>${escapeHtml(p.title)}</h4><div class="cart-item-price">${fmt(p.price)}</div><div class="cart-item-controls"><button data-action="cart-qty" data-id="${p.id}" data-delta="-1">−</button><span>${i.qty}</span><button data-action="cart-qty" data-id="${p.id}" data-delta="1">+</button></div></div><button class="cart-item-remove" data-action="cart-remove" data-id="${p.id}"><i class="fas fa-trash-alt"></i></button></div>`;
     }).join('');
     D.cartSubtotal.textContent = fmt(t.sub);
     D.cartShipping.textContent = t.ship === 0 ? 'Free' : fmt(t.ship);
@@ -286,7 +315,7 @@
         ls.set('wishlist', state.wishlist);
         wishlistRender();
       }
-    } catch (e) { /* silent */ }
+    } catch (e) { console.warn('[AshMart] Wishlist sync failed:', e.message); }
   }
 
   async function wishlistToggle(id) {
@@ -294,7 +323,7 @@
     i > -1 ? state.wishlist.splice(i,1) : state.wishlist.push(id);
     ls.set('wishlist', state.wishlist); wishlistRender(); wishlistUpdateBtns();
     if (API.isLoggedIn()) {
-      try { await API.toggleServerWishlist(products.find(x=>x.id===id)?._id || String(id)); } catch (e) { /* silent */ }
+      try { await API.toggleServerWishlist(products.find(x=>x.id===id)?._id || String(id)); } catch (e) { console.warn('[AshMart] Wishlist API failed:', e.message); }
     }
   }
   function wishlistRender() {
@@ -327,7 +356,7 @@
   }
   function compareRender() {
     D.compareCount.textContent = state.compare.length;
-    D.compareThumbs.innerHTML = state.compare.map(id => { const p=products.find(x=>x.id===id); return p?`<img src="${p.image}" alt="">`:'' }).join('');
+    D.compareThumbs.innerHTML = state.compare.map(id => { const p=products.find(x=>x.id===id); return p?`<img src="${escapeHtml(p.image)}" alt="">`:'' }).join('');
     D.compareBar.classList.toggle('active', state.compare.length >= 2);
   }
 
@@ -376,7 +405,7 @@
       const city = names[Math.floor(Math.random() * names.length)];
       const toast = document.createElement('div');
       toast.className = 'social-proof-toast';
-      toast.innerHTML = `<img src="${product.image}" alt="" class="social-proof-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=80&q=80'"><div class="social-proof-text"><strong>${city}</strong> just purchased <span>${product.title.length > 30 ? product.title.substring(0, 30) + '...' : product.title}</span></div>`;
+      toast.innerHTML = `<img src="${escapeHtml(product.image)}" alt="" class="social-proof-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=80&q=80'"><div class="social-proof-text"><strong>${escapeHtml(city)}</strong> just purchased <span>${escapeHtml(product.title.length > 30 ? product.title.substring(0, 30) + '...' : product.title)}</span></div>`;
       document.body.appendChild(toast);
       requestAnimationFrame(() => toast.classList.add('show'));
       setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
@@ -404,8 +433,8 @@
     const inC = state.compare.includes(p.id);
     return `<div class="product-card">
       <div class="product-card-image">
-        <img src="${p.image}" alt="${p.title}" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80'">
-        <span class="product-card-badge ${p.badge}">${p.badgeText}</span>
+        <img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80'">
+        <span class="product-card-badge ${escapeHtml(p.badge)}">${escapeHtml(p.badgeText)}</span>
         <div class="product-card-actions">
           <button class="wl-btn ${inW?'active':''}" data-id="${p.id}" data-action="wishlist-toggle" title="Wishlist"><i class="${inW?'fas':'far'} fa-heart"></i></button>
           <button class="${inC?'active':''}" data-action="compare-toggle" data-id="${p.id}" title="Compare"><i class="fas fa-exchange-alt"></i></button>
@@ -417,8 +446,8 @@
         </div>
       </div>
       <div class="product-card-info">
-        <div class="product-card-category">${p.category}</div>
-        <h3 class="product-card-title">${p.title}</h3>
+        <div class="product-card-category">${escapeHtml(p.category)}</div>
+        <h3 class="product-card-title">${escapeHtml(p.title)}</h3>
         <div class="product-card-rating"><span class="stars">${stars(p.rating)}</span><span>(${p.reviews.toLocaleString()})</span></div>
         <div class="product-card-price">
           <span class="current">${fmt(p.price)}</span>
@@ -489,6 +518,7 @@
   /* ===== PRODUCT DETAIL (QUICK VIEW) ===== */
   let currentGalleryIndex = 0;
   let currentModalProductId = null;
+  let previousModalFocus = null;
   window.__saQuickView = async function (id) {
     const p = products.find(x => x.id === id); if (!p) return;
     currentGalleryIndex = 0;
@@ -521,14 +551,14 @@
     const reviewsHtml = reviews.map(r => `
       <div class="review-card">
         <div class="review-header">
-          <img src="${r.avatar}" alt="${r.name}" class="review-avatar">
+          <div class="review-avatar">${escapeHtml(r.name.charAt(0))}</div>
           <div class="review-meta">
-            <div class="review-name">${r.name} ${r.verified ? '<span class="review-verified"><i class="fas fa-check-circle"></i> Verified</span>' : ''}</div>
+            <div class="review-name">${escapeHtml(r.name)} ${r.verified ? '<span class="review-verified"><i class="fas fa-check-circle"></i> Verified</span>' : ''}</div>
             <div class="review-stars">${stars(r.rating)}</div>
           </div>
           <span class="review-date">${r.date}</span>
         </div>
-        <p class="review-text">${r.text}</p>
+        <p class="review-text">${escapeHtml(r.text)}</p>
       </div>
     `).join('');
     const distHtml = dist.reverse().map((count, i) => {
@@ -539,9 +569,9 @@
     const related = products.filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
     const relatedHtml = related.map(r => `
       <div class="related-card" data-action="quick-view" data-id="${r.id}">
-        <img src="${r.image}" alt="${r.title}" loading="lazy">
+        <img src="${escapeHtml(r.image)}" alt="${escapeHtml(r.title)}" loading="lazy">
         <div class="related-info">
-          <h4>${r.title.length > 28 ? r.title.substring(0, 28) + '...' : r.title}</h4>
+          <h4>${escapeHtml(r.title.length > 28 ? r.title.substring(0, 28) + '...' : r.title)}</h4>
           <span class="related-price">${fmt(r.price)}</span>
         </div>
       </div>
@@ -552,16 +582,16 @@
       <div class="modal-gallery">
         <div class="modal-gallery-main">
           <button class="modal-gallery-arrow modal-gallery-prev" data-action="gallery-nav" data-dir="-1" data-id="${p.id}"><i class="fas fa-chevron-left"></i></button>
-          <img src="${p.images[0]}" alt="${p.title}" class="modal-main-image" id="modalMainImage" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80'">
+          <img src="${escapeHtml(p.images[0])}" alt="${escapeHtml(p.title)}" class="modal-main-image" id="modalMainImage" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80'">
           <button class="modal-gallery-arrow modal-gallery-next" data-action="gallery-nav" data-dir="1" data-id="${p.id}"><i class="fas fa-chevron-right"></i></button>
           <span class="modal-gallery-counter" id="modalGalleryCounter">1 / ${p.images.length}</span>
-          ${p.badge ? `<span class="modal-badge ${p.badge}">${p.badgeText}</span>` : ''}
+          ${p.badge ? `<span class="modal-badge ${escapeHtml(p.badge)}">${escapeHtml(p.badgeText)}</span>` : ''}
         </div>
-        <div class="modal-thumbnails">${p.images.map((img,i) => `<img src="${img}" alt="${p.title} ${i+1}" class="modal-thumb ${i===0?'active':''}" data-action="gallery-go" data-idx="${i}" data-id="${p.id}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80'">`).join('')}</div>
+        <div class="modal-thumbnails">${p.images.map((img,i) => `<img src="${escapeHtml(img)}" alt="${escapeHtml(p.title)} ${i+1}" class="modal-thumb ${i===0?'active':''}" data-action="gallery-go" data-idx="${i}" data-id="${p.id}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80'">`).join('')}</div>
       </div>
       <div class="modal-info">
-        <div class="modal-category">${p.category}</div>
-        <h2 class="modal-title">${p.title}</h2>
+        <div class="modal-category">${escapeHtml(p.category)}</div>
+        <h2 class="modal-title">${escapeHtml(p.title)}</h2>
         <div class="modal-rating"><span class="stars">${stars(p.rating)}</span><span>${p.rating} (${p.reviews.toLocaleString()} reviews)</span></div>
         <div class="modal-price-row">
           <div class="modal-price">${fmt(p.price)}</div>
@@ -570,7 +600,7 @@
         </div>
         <div class="modal-stock ${stock}"><i class="fas fa-circle"></i> ${stockLabel}</div>
         <div class="modal-urgency"><span class="modal-urgency-views"><i class="fas fa-eye"></i> ${viewerCount} people viewing this right now</span><span class="modal-urgency-stock"><i class="fas fa-fire"></i> Only ${stockCount} left in stock</span></div>
-        <p class="modal-description">${p.description}</p>
+        <p class="modal-description">${escapeHtml(p.description)}</p>
         <div class="modal-estimated-delivery">
           <i class="fas fa-truck-fast"></i>
           <div class="modal-estimated-delivery-text">
@@ -585,7 +615,7 @@
         </div>
         <div class="modal-specs"><h4>Product Details</h4><div class="modal-specs-grid">${specsHtml}</div></div>
         <div class="modal-colors"><h4>Colors</h4><div class="color-options">${p.colors.map((c,i) => `<button class="color-btn ${i===0?'active':''}" style="background:${c}" data-action="select-color"></button>`).join('')}</div></div>
-        <div class="modal-sizes"><h4>Size</h4><div class="size-options">${p.sizes.map((s,i) => `<button class="size-btn ${i===0?'active':''}" data-action="select-size">${s}</button>`).join('')}</div></div>
+        <div class="modal-sizes"><h4>Size</h4><div class="size-options">${p.sizes.map((s,i) => `<button class="size-btn ${i===0?'active':''}" data-action="select-size">${escapeHtml(s)}</button>`).join('')}</div></div>
         <div class="modal-quantity"><h4>Qty:</h4><button data-action="modal-qty" data-delta="-1">−</button><span id="modalQty">1</span><button data-action="modal-qty" data-delta="1">+</button></div>
         <div class="modal-actions">
           <button class="btn btn-primary" data-action="cart-add-close" data-id="${p.id}"><i class="fas fa-shopping-bag"></i> Add to Cart</button>
@@ -610,6 +640,9 @@
       </div>`;
     D.productModal.classList.add('active');
     D.body.style.overflow = 'hidden';
+    previousModalFocus = document.activeElement;
+    const firstFocusable = D.productModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (firstFocusable) firstFocusable.focus();
   };
 
   window.__saGalleryNav = function(dir, id) {
@@ -630,7 +663,7 @@
     });
   };
 
-  function closeModal() { D.productModal.classList.remove('active'); D.body.style.overflow = ''; currentModalProductId = null; }
+  function closeModal() { D.productModal.classList.remove('active'); D.body.style.overflow = ''; currentModalProductId = null; if (previousModalFocus) { previousModalFocus.focus(); previousModalFocus = null; } }
   window.__saCloseModal = closeModal;
 
   /* ===== SEARCH ===== */
@@ -639,7 +672,7 @@
     if (!query) { D.searchResults.classList.remove('visible'); D.searchSuggestions.style.display = 'block'; D.searchClear.classList.remove('visible'); return; }
     D.searchClear.classList.add('visible'); D.searchSuggestions.style.display = 'none';
     const r = products.filter(p => p.title.toLowerCase().includes(query) || p.category.toLowerCase().includes(query) || p.description.toLowerCase().includes(query));
-    D.searchResults.innerHTML = r.length ? r.map(p => `<div class="search-result-item" data-action="quick-view-close-search" data-id="${p.id}"><img src="${p.image}" alt="${p.title}" loading="lazy"><div class="result-info"><h4>${p.title}</h4><span>${p.category} · ${fmt(p.price)}</span></div></div>`).join('') : '<p style="text-align:center;color:var(--text-tertiary);padding:20px;">No products found</p>';
+    D.searchResults.innerHTML = r.length ? r.map(p => `<div class="search-result-item" data-action="quick-view-close-search" data-id="${p.id}"><img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" loading="lazy"><div class="result-info"><h4>${escapeHtml(p.title)}</h4><span>${escapeHtml(p.category)} · ${fmt(p.price)}</span></div></div>`).join('') : '<p style="text-align:center;color:var(--text-tertiary);padding:20px;">No products found</p>';
     D.searchResults.classList.add('visible');
   }
 
@@ -783,7 +816,7 @@
   function renderCheckoutSummary() {
     const items = state.cart.map(i => {
       const p = products.find(x => x.id === i.id); if (!p) return '';
-      return `<div class="checkout-item"><img src="${p.image}" alt="${p.title}" loading="lazy"><div class="checkout-item-info"><h4>${p.title}</h4><div class="checkout-item-meta">${p.category}</div><div class="checkout-item-price">${fmt(p.price)} <span class="checkout-item-qty">× ${i.qty}</span></div></div></div>`;
+      return `<div class="checkout-item"><img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" loading="lazy"><div class="checkout-item-info"><h4>${escapeHtml(p.title)}</h4><div class="checkout-item-meta">${escapeHtml(p.category)}</div><div class="checkout-item-price">${fmt(p.price)} <span class="checkout-item-qty">× ${i.qty}</span></div></div></div>`;
     }).join('');
     document.getElementById('checkoutItems').innerHTML = items;
     updateCkTotals();
@@ -853,12 +886,12 @@
 
   function renderPaymentReview() {
     const s = ckShippingData;
-    const addr = `${s.name}<br>${s.address}${s.landmark ? ', ' + s.landmark : ''}<br>${s.city}, ${s.state} - ${s.pincode}<br>Phone: ${s.phone}<br>Email: ${s.email}`;
+    const addr = `${escapeHtml(s.name)}<br>${escapeHtml(s.address)}${s.landmark ? ', ' + escapeHtml(s.landmark) : ''}<br>${escapeHtml(s.city)}, ${escapeHtml(s.state)} - ${escapeHtml(s.pincode)}<br>Phone: ${escapeHtml(s.phone)}<br>Email: ${escapeHtml(s.email)}`;
     document.getElementById('ckShippingReview').innerHTML = addr;
     const t = cartTotals();
     let itemsHtml = state.cart.map(i => {
       const p = products.find(x => x.id === i.id); if (!p) return '';
-      return `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;"><span>${p.title} × ${i.qty}</span><strong>${fmt(p.price * i.qty)}</strong></div>`;
+      return `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;"><span>${escapeHtml(p.title)} × ${i.qty}</span><strong>${fmt(p.price * i.qty)}</strong></div>`;
     }).join('');
     itemsHtml += `<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;font-size:12px;">`;
     itemsHtml += `<div style="display:flex;justify-content:space-between;"><span>Shipping</span><span>${t.ship === 0 ? 'Free' : fmt(t.ship)}</span></div>`;
@@ -878,7 +911,7 @@
 
     const items = state.cart.map(ci => {
       const p = products.find(x => x.id === ci.id);
-      return { product: p ? (p._id || String(p.id)) : String(ci.id), title: ci.title, image: ci.image, price: ci.price, quantity: ci.qty, size: ci.size, color: ci.color };
+      return { product: p ? (p._id || String(ci.id)) : String(ci.id), title: p ? p.title : '', image: p ? p.image : '', price: p ? p.price : 0, quantity: ci.qty };
     });
     const shippingAddress = {
       fullName: ckShippingData.name, email: ckShippingData.email, phone: ckShippingData.phone,
@@ -888,7 +921,7 @@
     const orderPayload = {
       items, shippingAddress, paymentMethod: 'cod',
       subtotal: t.sub, shipping: t.ship, tax: t.tax, discount: t.disc, total: t.total,
-      note: ckShippingData.note || ''
+      note: ckShippingData.note || '', giftWrap: state.giftWrap
     };
 
     let savedOrder = null;
@@ -916,7 +949,7 @@
     /* --- Build order items --- */
     const items = state.cart.map(ci => {
       const p = products.find(x => x.id === ci.id);
-      return { product: p ? (p._id || String(p.id)) : String(ci.id), title: ci.title, image: ci.image, price: ci.price, quantity: ci.qty, size: ci.size, color: ci.color };
+      return { product: p ? (p._id || String(ci.id)) : String(ci.id), title: p ? p.title : '', image: p ? p.image : '', price: p ? p.price : 0, quantity: ci.qty };
     });
     const shippingAddress = {
       fullName: ckShippingData.name, email: ckShippingData.email, phone: ckShippingData.phone,
@@ -926,7 +959,7 @@
     const orderPayload = {
       items, shippingAddress, paymentMethod: 'razorpay',
       subtotal: t.sub, shipping: t.ship, tax: t.tax, discount: t.disc, total: t.total,
-      note: ckShippingData.note || ''
+      note: ckShippingData.note || '', giftWrap: state.giftWrap
     };
 
     /* --- Save order to backend --- */
@@ -1211,7 +1244,9 @@
       const pass = document.getElementById('regPass').value;
       if (!name || !email || !phone || !pass) { showAuthError('registerError', 'Fill all fields'); return; }
       if (!/^[6-9]\d{9}$/.test(phone)) { showAuthError('registerError', 'Enter valid 10-digit phone'); return; }
-      if (pass.length < 6) { showAuthError('registerError', 'Password min 6 characters'); return; }
+      if (pass.length < 8) { showAuthError('registerError', 'Password must be at least 8 characters'); return; }
+      if (!/[A-Z]/.test(pass)) { showAuthError('registerError', 'Password must contain an uppercase letter'); return; }
+      if (!/[0-9]/.test(pass)) { showAuthError('registerError', 'Password must contain a number'); return; }
       const btn = D.authRegisterForm.querySelector('button[type="submit"]');
       btnLoad(btn, true);
       try {
@@ -1283,6 +1318,14 @@
       if (D.productModal.classList.contains('active') && currentModalProductId) {
         if (e.key === 'ArrowLeft') window.__saGalleryNav(-1, currentModalProductId);
         if (e.key === 'ArrowRight') window.__saGalleryNav(1, currentModalProductId);
+        if (e.key === 'Tab') {
+          const focusable = D.productModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (focusable.length === 0) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
       }
     });
 
@@ -1493,7 +1536,8 @@
         renderBestSellers();
         renderTrending();
       }
-    }).catch(() => {});
+      setTimeout(() => safe(initAos, 'aos'), 50);
+    }).catch(e => console.warn('[AshMart] Products API load failed:', e.message));
     setTimeout(() => safe(initGsap, 'gsap'), 150);
     setTimeout(() => safe(initAos, 'aos'), 250);
     hideLoader();

@@ -1,4 +1,5 @@
 const Cart = require('../models/Cart');
+const Product = require('../models/Product');
 
 exports.getCart = async (req, res) => {
   try {
@@ -50,9 +51,15 @@ exports.syncCart = async (req, res) => {
 exports.addToCart = async (req, res) => {
   try {
     const { productId, qty = 1 } = req.body;
+    const product = await Product.findById(productId);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) cart = await Cart.create({ user: req.user._id, items: [] });
     const existing = cart.items.find(i => i.product.toString() === productId);
+    const currentQty = existing ? existing.qty : 0;
+    if (currentQty + qty > product.stock) {
+      return res.status(400).json({ success: false, message: 'Only ' + product.stock + ' items available in stock' });
+    }
     if (existing) {
       existing.qty += qty;
     } else {
@@ -74,6 +81,10 @@ exports.updateCartItem = async (req, res) => {
     if (qty <= 0) {
       cart.items = cart.items.filter(i => i.product.toString() !== req.params.productId);
     } else {
+      const product = await Product.findById(req.params.productId);
+      if (product && qty > product.stock) {
+        return res.status(400).json({ success: false, message: 'Only ' + product.stock + ' items available in stock' });
+      }
       const item = cart.items.find(i => i.product.toString() === req.params.productId);
       if (item) item.qty = qty;
     }
